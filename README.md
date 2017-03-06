@@ -7,7 +7,7 @@ ando::overlay::Overlay *overlay = new ando::overlay::concrete::D2DOverlay();
 overlay->waitForWindow("Calculator");
 
 if (overlay->createWindow()) {
-    std::thread runThread(std::bind(&ando::overlay::concrete::D2DOverlay::run, overlay));
+    std::thread runThread(std::bind(&ando::overlay::Overlay::run, overlay));
 
     while (overlay->canRunExternaly()) {
         overlay->DrawOutlinedLine(0.f, 0.f, overlay->getLocal().getWidth<float>(), overlay->getLocal().getHeight<float>(), ando::colors::red);

@@ -47,9 +47,54 @@ namespace ando {
 	namespace colors {
 		extern Color black;
 		extern Color white;
+
 		extern Color red;
 		extern Color green;
 		extern Color blue;
+
+		namespace reds {
+			extern Color fantasy;
+			extern Color vanillaIce;
+			extern Color shilo;
+			extern Color newYorkPink;
+			extern Color chestnutRose;
+			extern Color tallPoppy;
+			extern Color mexicanRed;
+			extern Color oldBrick;
+			extern Color mocha;
+			extern Color cherrywood;
+			extern Color provincialPink;
+			extern Color azalea;
+			extern Color mandysPink;
+			extern Color apricot;
+			extern Color burntSienna;
+			extern Color cinnabar;
+			extern Color flushMahogany;
+		}
+
+		namespace purples {
+			extern Color prelude;
+			extern Color lightWisteria;
+			extern Color eastSide;
+			extern Color wisteria;
+			extern Color affair;
+			extern Color bossanova;
+		}
+
+		namespace blues {
+			extern Color regentStBlue;
+			extern Color halfBaked;
+			extern Color danube;
+			extern Color mariner;
+			extern Color jellyBean;
+			extern Color matisse;
+			extern Color blumine;
+			extern Color biscay;
+			extern Color blizzardBlue;
+			extern Color seagull;
+			extern Color pictonBlue;
+			extern Color curiousBlue;
+		}
 	}
 }
 

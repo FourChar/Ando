@@ -112,10 +112,55 @@ namespace ando {
 	}
 
 	namespace colors {
-		Color black(0, 0, 0, 255);
-		Color white(255, 255, 255, 255);
-		Color red(255, 0, 0, 255);
-		Color green(0, 255, 0, 255);
-		Color blue(0, 0, 255, 255);
+		Color black(0, 0, 0);
+		Color white(255, 255, 255);
+
+		Color red(255, 0, 0);
+		Color green(0, 255, 0);
+		Color blue(0, 0, 255);
+
+		namespace reds {
+			Color vanillaIce(242, 215, 213);
+			Color shilo(230, 176, 170);
+			Color newYorkPink(217, 136, 128);
+			Color chestnutRose(205, 97, 85);
+			Color tallPoppy(192, 57, 43);
+			Color mexicanRed(169, 50, 38);
+			Color oldBrick(146, 43, 33);
+			Color mocha(123, 36, 28);
+			Color cherrywood(100, 30, 22);
+			Color azalea(250, 219, 216);
+			Color mandysPink(245, 183, 177);
+			Color apricot(241, 148, 138);
+			Color burntSienna(236, 112, 99);
+			Color cinnabar(231, 76, 60);
+			Color flushMahogany(203, 67, 53);
+			Color burntUmber(148, 49, 38);
+			Color metalicCopper(120, 40, 31);
+		}
+
+		namespace purples {
+			Color prelude(215, 189, 226);
+			Color lightWisteria(195, 155, 211);
+			Color eastSide(175, 122, 197);
+			Color wisteria(155, 89, 182);
+			Color affair(136, 78, 160);
+			Color bossanova(81, 46, 95);
+		}
+
+		namespace blues {
+			Color regentStBlue(169, 204, 227);
+			Color halfBaked(127, 179, 213);
+			Color danube(84, 153, 199);
+			Color mariner(41, 128, 185);
+			Color jellyBean(36, 113, 163);
+			Color matisse(31, 97, 141);
+			Color blumine(26, 82, 118);
+			Color biscay(21, 67, 96);
+			Color blizzardBlue(174, 214, 241);
+			Color seagull(133, 193, 233);
+			Color pictonBlue(93, 173, 226);
+			Color curiousBlue(52, 152, 219);
+		}
 	}
 }

@@ -9,7 +9,6 @@
 
 #include "ISurfaceRenderer.hpp"
 #include "OverlayRenderer.hpp"
-#include "ObjectManager.hpp"
 #include "OverlayInstance.hpp"
 #include "ISurfaceFont.hpp"
 
@@ -26,7 +25,10 @@ namespace ando {
 
 			bool waitForWindow(std::string targetWindowName);
 			bool createWindow();
+
 			void destroyWindow();
+
+			void runThread();
 			void run();
 
 			void alignToTarget();

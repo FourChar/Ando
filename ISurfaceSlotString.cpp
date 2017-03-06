@@ -10,7 +10,7 @@ namespace ando {
 				}
 
 				// Getters
-				ISurfaceFont *ISurfaceSlotString::getFont() const {
+				std::shared_ptr<ando::overlay::surface::ISurfaceFont> ISurfaceSlotString::getFont() const {
 					return this->font;
 				}
 				uint8_t ISurfaceSlotString::getSize() const {
@@ -24,7 +24,7 @@ namespace ando {
 				}
 
 				// Setters
-				void ISurfaceSlotString::setFont(ISurfaceFont *font) {
+				void ISurfaceSlotString::setFont(std::shared_ptr<ando::overlay::surface::ISurfaceFont> font) {
 					this->font = font;
 				}
 				void ISurfaceSlotString::setSize(uint8_t size) {

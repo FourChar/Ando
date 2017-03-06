@@ -12,10 +12,7 @@ namespace ando {
 		}
 
 		Overlay::~Overlay() {
-			this->onDestroy();
-
-			if (this->getLocal().getHwnd())
-				DestroyWindow(this->getLocal().getHwnd());
+			this->destroyWindow();
 		}
 
 		bool Overlay::RunFrame() {
@@ -161,8 +158,14 @@ namespace ando {
 		}
 
 		void Overlay::destroyWindow() {
-			this->onDestroy();
-			DestroyWindow(this->getLocal().getHwnd());
+			if(this->getLocal().getHwnd())
+				DestroyWindow(this->getLocal().getHwnd());
+		}
+
+		void Overlay::runThread() {
+			std::thread t(std::bind(&ando::overlay::Overlay::run, this));
+
+			t.join();
 		}
 
 		void Overlay::run() {
@@ -179,10 +182,12 @@ namespace ando {
 					DispatchMessage(&message);
 				}
 				else {
-					if (frameCounter++ > 254) {
+					if (frameCounter++ >= 254) {
 						frameCounter = 0;
 
+						printf("Searching for window...\r\n");
 						if (!FindWindowA(NULL, this->getTarget().getWindowTitle().c_str())) {
+							printf("Window closed!\r\n");
 							this->running = false;
 							break;
 						}
@@ -193,6 +198,8 @@ namespace ando {
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
+
+			printf("Destroying window!\r\n");
 
 			this->destroyWindow();
 		}
@@ -248,8 +255,11 @@ namespace ando {
 		}
 
 		bool Overlay::canRunExternaly() const {
+			if (!this->isRunning())
+				return false;
+
 			this->waitForEmptyQueue();
-			return this->isRunning();
+			return true;
 		}
 	}
 };

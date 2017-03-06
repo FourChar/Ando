@@ -5,6 +5,8 @@
 #pragma once
 #endif
 
+#include <memory>
+
 #include "ISurfaceSlot.hpp"
 #include "ISurfaceFont.hpp"
 
@@ -14,7 +16,7 @@ namespace ando {
 			namespace queue {
 				class ISurfaceSlotString : public ISurfaceSlot {
 				private:
-					ISurfaceFont *font;
+					std::shared_ptr<ando::overlay::surface::ISurfaceFont> font;
 					uint8_t size;
 					bool centered;
 					std::string text;
@@ -23,13 +25,13 @@ namespace ando {
 					ISurfaceSlotString();
 
 				public: // Getters
-					ISurfaceFont *getFont() const;
+					std::shared_ptr<ando::overlay::surface::ISurfaceFont> getFont() const;
 					uint8_t getSize() const;
 					bool isCentered() const;
 					std::string getText() const;
 
 				public: // Setters
-					void setFont(ISurfaceFont *font);
+					void setFont(std::shared_ptr<ando::overlay::surface::ISurfaceFont> font);
 					void setSize(uint8_t size);
 					void setCentered(bool centered);
 					void setText(std::string text);

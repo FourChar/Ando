@@ -25,6 +25,9 @@ namespace ando {
 			D2DOverlay::D2DOverlay() : factory(nullptr), renderTarget(nullptr) {
 
 			}
+			D2DOverlay::~D2DOverlay() {
+				this->onDestroy();
+			}
 
 			bool D2DOverlay::initialize() {
 				if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &this->factory)))
@@ -120,7 +123,7 @@ namespace ando {
 				return result;
 			}
 
-			void D2DOverlay::DrawRawString(float x, float y, uint8_t size, bool centered, ando::Color color, ando::overlay::surface::ISurfaceFont *font, const char *string) {
+			void D2DOverlay::DrawRawString(float x, float y, uint8_t size, bool centered, ando::Color color, std::shared_ptr<ando::overlay::surface::ISurfaceFont> font, const char *string) {
 				if (!font->isInitialized()) {
 					printf("[WARNING] Font not initialized (%s)!\r\n", font->getName().c_str());
 					return;
@@ -154,7 +157,7 @@ namespace ando {
 					actualFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 				}
 
-				this->renderTarget->DrawText(conv.from_bytes(string).c_str(), length, actualFont, rect, (ID2D1Brush*)(*this->toD2DColor(color).get()));
+				this->renderTarget->DrawText(conv.from_bytes(string).c_str(), length, actualFont, rect, (ID2D1Brush*)this->toD2DColor(color));
 
 				if (centered) {
 					actualFont->SetTextAlignment(textAlignment);
@@ -162,26 +165,26 @@ namespace ando {
 				}
 			}
 			void D2DOverlay::DrawLine(float x1, float y1, float x2, float y2, ando::Color color) {
-				this->renderTarget->DrawLine(D2D1::Point2F(x1, y1), D2D1::Point2F(x2, y2), (*this->toD2DColor(color).get()), 0.5f);
+				this->renderTarget->DrawLine(D2D1::Point2F(x1, y1), D2D1::Point2F(x2, y2), this->toD2DColor(color), 0.5f);
 			}
 			void D2DOverlay::DrawRectangle(float x, float y, float width, float height, ando::Color color) {
 				D2D1_RECT_F rect = D2D1::RectF(x, y, x + width, y + height);
 
 				D2D1_ANTIALIAS_MODE oldMode = this->renderTarget->GetAntialiasMode();
 				this->renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
-				this->renderTarget->DrawRectangle(&rect, (*this->toD2DColor(color).get()));
+				this->renderTarget->DrawRectangle(&rect, this->toD2DColor(color));
 				this->renderTarget->SetAntialiasMode(oldMode);
 			}
 			void D2DOverlay::FillRectangle(float x, float y, float width, float height, ando::Color color) {
-				D2D1_RECT_F rect = D2D1::RectF(x, y, x + width, y + height);
+				D2D1_RECT_F rect = D2D1::RectF(x - 1, y - 1, x + width, y + height);
 
 				D2D1_ANTIALIAS_MODE oldMode = this->renderTarget->GetAntialiasMode();
 				this->renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
-				this->renderTarget->FillRectangle(&rect, (*this->toD2DColor(color).get()));
+				this->renderTarget->FillRectangle(&rect, this->toD2DColor(color));
 				this->renderTarget->SetAntialiasMode(oldMode);
 			}
 
-			std::shared_ptr<ID2D1SolidColorBrush *> D2DOverlay::toD2DColor(ando::Color andoColor) {
+			ID2D1SolidColorBrushPtr D2DOverlay::toD2DColor(ando::Color andoColor) {
 				for (std::size_t i = 0; i < this->colors.size(); i++) {
 					direct2d::D2DColor *color = this->colors.at(i);
 
@@ -195,7 +198,7 @@ namespace ando {
 				return this->colors.at(this->colors.size() - 1)->getColor();
 			}
 
-			IDWriteFactory *D2DOverlay::getWriteFactory() {
+			IDWriteFactoryPtr D2DOverlay::getWriteFactory() const {
 				return this->writeFactory;
 			}
 		}

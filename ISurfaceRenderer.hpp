@@ -15,7 +15,7 @@ namespace ando {
 		namespace surface {
 			class ISurfaceRenderer : public ISurfaceBasicRenderer {
 			protected:
-				std::vector<ISurfaceFont*> fonts;
+				std::vector<std::shared_ptr<ISurfaceFont>> fonts;
 				ando::overlay::surface::queue::ISurfaceQueue renderQueue;
 
 			public:
@@ -24,8 +24,8 @@ namespace ando {
 				void waitForEmptyQueue() const;
 
 			protected:
-				ISurfaceFont *getFont(const std::string name, const uint8_t size) const;
-				ISurfaceFont *addFont(const std::string name, const uint8_t size, const uint16_t weight, const bool italics);
+				std::shared_ptr<ISurfaceFont> getFont(const std::string name, const uint8_t size) const;
+				std::shared_ptr<ISurfaceFont> addFont(const std::string name, const uint8_t size, const uint16_t weight, const bool italics);
 				void releaseFonts();
 
 				virtual bool FontInitializer(const ISurfaceFont *font) = 0;

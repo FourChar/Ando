@@ -7,8 +7,11 @@
 
 #include <memory>
 #include <d2d1.h>
+#include <comdef.h>
 
 #include "Color.hpp"
+
+_COM_SMARTPTR_TYPEDEF(ID2D1SolidColorBrush, __uuidof(ID2D1SolidColorBrush));
 
 namespace ando {
 	namespace overlay {
@@ -17,17 +20,17 @@ namespace ando {
 				class D2DColor {
 				private:
 					ando::Color andoColor;
-					std::shared_ptr<ID2D1SolidColorBrush *> color;
+					ID2D1SolidColorBrushPtr color;
 
 				public:
 					D2DColor(ID2D1HwndRenderTarget *renderTarget, ando::Color andoColor);
 					~D2DColor();
 
 					ando::Color getAndoColor();
-					std::shared_ptr<ID2D1SolidColorBrush *> getColor();
+					ID2D1SolidColorBrushPtr getColor();
 				};
 			}
-			}
+		}
 	}
 }
 

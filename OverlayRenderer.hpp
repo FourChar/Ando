@@ -5,7 +5,6 @@
 #pragma once
 #endif
 
-#include "RenderObject.hpp"
 #include "OverlayEvents.hpp"
 
 namespace ando {

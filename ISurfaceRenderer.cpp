@@ -14,9 +14,9 @@ namespace ando {
 				while (!this->renderQueue.isQueueEmpty());
 			}
 
-			ISurfaceFont *ISurfaceRenderer::getFont(const std::string name, const uint8_t size) const {
+			std::shared_ptr<ISurfaceFont> ISurfaceRenderer::getFont(const std::string name, const uint8_t size) const {
 				for (std::size_t i = 0; i < this->fonts.size(); i++) {
-					ISurfaceFont *font = this->fonts.at(i);
+					auto font = this->fonts.at(i);
 
 					if ((font->getName().compare(name) != 0) || (font->getSize() != size))
 						continue;
@@ -26,11 +26,11 @@ namespace ando {
 
 				return nullptr;
 			}
-			ISurfaceFont *ISurfaceRenderer::addFont(const std::string name, const uint8_t size, const uint16_t weight, const bool italics) {
+			std::shared_ptr<ISurfaceFont> ISurfaceRenderer::addFont(const std::string name, const uint8_t size, const uint16_t weight, const bool italics) {
 				if (name.empty())
 					return nullptr;
 
-				ISurfaceFont *newFont = new ISurfaceFont(name, size, weight, italics, std::bind(&ando::overlay::surface::ISurfaceRenderer::FontInitializer, this, std::placeholders::_1));
+				std::shared_ptr<ISurfaceFont> newFont = std::make_shared<ISurfaceFont>(name, size, weight, italics, std::bind(&ando::overlay::surface::ISurfaceRenderer::FontInitializer, this, std::placeholders::_1));
 				
 				this->fonts.push_back(newFont);
 
@@ -38,18 +38,17 @@ namespace ando {
 			}
 			void ISurfaceRenderer::releaseFonts() {
 				for (std::size_t i = 0; i < this->fonts.size(); i++) {
-					ISurfaceFont *font = this->fonts.at(i);
+					auto font = this->fonts.at(i);
 
 					void **actualFont = font->getFont();
 					//SafeRelease(actualFont);
 
-					delete font;
 					this->fonts.erase(this->fonts.begin() + i);
 				}
 			}
 
 			void ISurfaceRenderer::DrawOutlinedString(float x, float y, uint8_t size, bool centered, ando::Color color, ando::Color outlineColor, std::string fontName, const char * format, ...) {
-				ISurfaceFont *font = this->getFont(fontName, size);
+				std::shared_ptr<ISurfaceFont> font = this->getFont(fontName, size);
 				if (!font) {
 					font = this->addFont(fontName, size, ISURFACE_TEXT_WEIGHT_DEFAULT, ISURFACE_TEXT_ITALICS_DEFAULT);
 
@@ -89,7 +88,7 @@ namespace ando {
 			}
 
 			void ISurfaceRenderer::DrawString(float x, float y, ando::Color color, std::string fontName, const char *format, ...) {
-				ISurfaceFont *font = this->getFont(fontName, ISURFACE_TEXT_SIZE_DEFAULT);
+				std::shared_ptr<ISurfaceFont> font = this->getFont(fontName, ISURFACE_TEXT_SIZE_DEFAULT);
 				if (!font) {
 					font = this->addFont(fontName, ISURFACE_TEXT_SIZE_DEFAULT, ISURFACE_TEXT_WEIGHT_DEFAULT, ISURFACE_TEXT_ITALICS_DEFAULT);
 
@@ -102,7 +101,7 @@ namespace ando {
 				this->renderQueue.DrawRawString(x, y, ISURFACE_TEXT_SIZE_DEFAULT, false, color, font, buffer);
 			}
 			void ISurfaceRenderer::DrawString(float x, float y, uint8_t size, bool centered, ando::Color color, std::string fontName, const char *format, ...) {
-				ISurfaceFont *font = this->getFont(fontName, size);
+				std::shared_ptr<ISurfaceFont> font = this->getFont(fontName, size);
 				if (!font) {
 					font = this->addFont(fontName, size, ISURFACE_TEXT_WEIGHT_DEFAULT, ISURFACE_TEXT_ITALICS_DEFAULT);
 

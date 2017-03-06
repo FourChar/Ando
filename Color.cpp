@@ -5,10 +5,8 @@ namespace ando {
 		this->uColor[0] = this->uColor[1] = this->uColor[2] = this->uColor[3] = 0;
 	}
 	Color::Color(const Color &col) {
-		this->uColor[0] = col.uColor[0];
-		this->uColor[1] = col.uColor[1];
-		this->uColor[2] = col.uColor[2];
-		this->uColor[3] = col.uColor[3];
+		for (int i = 0; i < 4; i++)
+			this->uColor[i] = col.uColor[i];
 	}
 	Color::Color(uint8_t uColor[4]) {
 		for(int i = 0; i < 4; i++)
@@ -98,17 +96,19 @@ namespace ando {
 		return (*this);
 	}
 	
-	void Color::set(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	Color &Color::set(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 		this->setR(r);
 		this->setG(g);
 		this->setB(b);
 		this->setA(a);
+		return (*this);
 	}
-	void Color::set(unsigned long hex) {
+	Color &Color::set(unsigned long hex) {
 		this->uColor[0] = (uint8_t)((hex >> 16) & 0xFF);
 		this->uColor[1] = (uint8_t)((hex >> 8) & 0xFF);
 		this->uColor[3] = (uint8_t)((hex >> 24) & 0xFF);
 		this->uColor[2] = (uint8_t)(hex & 0xFF);
+		return (*this);
 	}
 
 	namespace colors {

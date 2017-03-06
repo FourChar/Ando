@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
 	if (overlay->createWindow()) {
 		printf("Running overlay thread...\r\n");
 		std::thread runThread(std::bind(&ando::overlay::Overlay::run, overlay));
+		//overlay->runThread();
 
 		printf("Waiting for overlay to close...\r\n");
 		while (overlay->canRunExternaly()) {
@@ -22,8 +23,12 @@ int main(int argc, char *argv[]) {
 			overlay->DrawOutlinedLine(overlay->getLocal().getWidth<float>(), 0.f, 0.f, overlay->getLocal().getHeight<float>(), ando::colors::red);
 			overlay->FillOutlinedRectangle(50, 50, 100, 100, ando::colors::reds::mexicanRed);
 
-			overlay->DrawOutlinedString(55, 55, ando::colors::blues::jellyBean, "Arial", "Sean sucks!");
+			overlay->DrawOutlinedString(55, 55, ando::colors::blues::blizzardBlue, "Arial", "Sean sucks!");
+			overlay->DrawOutlinedString(55, 75, ando::colors::blues::blizzardBlue, "Comic Sans MS", "Sean sucks!");
 		}
+		printf("Overlay closed...\r\n");
+
+		runThread.join();
 	}
 	
 	return FALSE;

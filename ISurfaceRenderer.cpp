@@ -40,7 +40,7 @@ namespace ando {
 				for (std::size_t i = 0; i < this->fonts.size(); i++) {
 					ISurfaceFont *font = this->fonts.at(i);
 
-					ObjectType *actualFont = font->getFont();
+					void **actualFont = font->getFont();
 					//SafeRelease(actualFont);
 
 					delete font;

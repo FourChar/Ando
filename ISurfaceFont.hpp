@@ -8,8 +8,6 @@
 #include <string>
 #include <functional>
 
-#include "ObjectManager.hpp"
-
 #define ISURFACE_OUTLINE_ALPHA			170
 #define ISURFACE_TEXT_SIZE_DEFAULT		16
 #define ISURFACE_TEXT_WEIGHT_DEFAULT	400
@@ -30,7 +28,7 @@ namespace ando {
 				uint8_t size;
 				uint16_t weight;
 				bool italics;
-				ObjectType font;
+				void *font;
 
 			public:
 				ISurfaceFont(const std::string name, const uint8_t size = ISURFACE_TEXT_SIZE_DEFAULT, const uint16_t weight = ISURFACE_TEXT_WEIGHT_DEFAULT, const bool italics = ISURFACE_TEXT_ITALICS_DEFAULT);
@@ -50,7 +48,7 @@ namespace ando {
 				uint8_t getSize() const;
 				uint16_t getWeight() const;
 				bool isItalics() const;
-				ObjectType *getFont() const;
+				void **getFont() const;
 
 			public: // Setters
 				void setInitialized(bool initialized);

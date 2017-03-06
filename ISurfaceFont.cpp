@@ -51,8 +51,8 @@ namespace ando {
 			bool ISurfaceFont::isItalics() const {
 				return this->italics;
 			}
-			ObjectType *ISurfaceFont::getFont() const {
-				return const_cast<ObjectType *>(&this->font);
+			void **ISurfaceFont::getFont() const {
+				return const_cast<void **>(&this->font);
 			}
 
 			// Setters

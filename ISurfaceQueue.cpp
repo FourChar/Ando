@@ -45,6 +45,7 @@ namespace ando {
 							}
 						}
 
+						delete next;
 						this->queue.pop();
 					}
 				}

@@ -1,6 +1,6 @@
 # Ando Framework
 
-### *__How to use OverlayIncluder.hpp__*
+## How to use OverlayIncluder.hpp
 You'll first have to define `OVERLAY_RENDERER_NAME` with the shorthand of the renderer you'd like to use:
 ```C++
 #define OVERLAY_RENDERER_NAME D2D

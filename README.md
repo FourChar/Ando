@@ -7,17 +7,16 @@ You'll first have to define `OVERLAY_RENDERER_NAME` with the shorthand of the re
 ```
 You've got a choice of any of the following:
 
-Shorthand | Renderer
---------- | --------
-`D2D`     | Direct2D
-`D3D9`    | Direct3D 9
-`D3D10`   | Direct3D 10
-`D3D11`   | Direct3D 11
-`D3D12`   | Direct3D 12
-`OGL`     | OpenGL
-`GDI`     | Windows GDI
+Shorthand | Renderer    | Implemented
+--------- | ----------- | -----------
+`D2D`     | Direct2D    | **Yes**
+`D3D9`    | Direct3D 9  | *No*
+`D3D10`   | Direct3D 10 | *No*
+`D3D11`   | Direct3D 11 | *No*
+`D3D12`   | Direct3D 12 | *No*
+`OGL`     | OpenGL      | *No*
+`GDI`     | Windows GDI | *No*
 *I plan to add all the above mentioned renderers...*
-
 
 Next, simply include **OverlayIncluder.hpp**:
 ```C++

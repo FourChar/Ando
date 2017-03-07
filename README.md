@@ -6,15 +6,15 @@ You'll first have to define `OVERLAY_RENDERER_NAME` with the shorthand of the re
 #define OVERLAY_RENDERER_NAME D2D
 ```
 You've got a choice of any of the following:
-| Shorthand | Renderer | Implemented |
-| --- | --- | --- |
-| `D2D` | Direct2D | Yes |
-| `D3D9` | Direct3D 9 | *No* |
-| `D3D10` | Direct3D 10 | *No* |
-| `D3D11` | Direct3D 11 | *No* |
-| `D3D12` | Direct3D 12 | *No* |
-| `OGL` | OpenGL | *No* |
-| `GDI` | Windows GDI | *No* |
+| Shorthand |   Renderer  | Implemented |
+| --------- | ----------- | ----------- |
+|   `D2D`   |   Direct2D  | Yes |
+|   `D3D9`  |  Direct3D 9 | *No* |
+|  `D3D10`  | Direct3D 10 | *No* |
+|  `D3D11`  | Direct3D 11 | *No* |
+|  `D3D12`  | Direct3D 12 | *No* |
+|   `OGL`   |   OpenGL    | *No* |
+|   `GDI`   | Windows GDI | *No* |
 *I plan to add all the above mentioned renderers...*
 
 

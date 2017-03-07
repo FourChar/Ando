@@ -25,9 +25,7 @@ namespace ando {
 			bool bindToWindow(std::string targetWindowName);
 
 			std::shared_ptr<std::thread> runThreaded();
-			void runExternal(std::function<void(std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f);
-
-			bool canRunExternaly();
+			void render(std::function<void(std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f);
 
 		protected:
 			virtual LRESULT CALLBACK windowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -75,6 +73,7 @@ namespace ando {
 			void setRunning(bool running);
 
 			void waitForEmptyQueue();
+			bool canRunExternaly();
 
 		protected:
 			ando::overlay::OverlayInstance targetInstance;

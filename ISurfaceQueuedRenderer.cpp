@@ -30,6 +30,21 @@ namespace ando {
 				this->renderQueue->FillRectangle(x, y, width, height, color);
 			}
 
+			void ISurfaceQueuedRenderer::DrawString(float x, float y, ando::Color color, std::string fontName, const char *format, ...) {
+				std::shared_ptr<ISurfaceFont> font = this->renderer->getOrCreateFont(fontName, ISURFACE_TEXT_SIZE_DEFAULT);
+
+				FORMAT_STRING(256);
+
+				this->DrawRawString(x, y, ISURFACE_TEXT_SIZE_DEFAULT, false, color, font, buffer);
+			}
+			void ISurfaceQueuedRenderer::DrawString(float x, float y, uint8_t size, bool centered, ando::Color color, std::string fontName, const char *format, ...) {
+				std::shared_ptr<ISurfaceFont> font = this->renderer->getOrCreateFont(fontName, size);
+
+				FORMAT_STRING(256);
+
+				this->DrawRawString(x, y, size, centered, color, font, buffer);
+			}
+
 			void ISurfaceQueuedRenderer::DrawOutlinedString(float x, float y, uint8_t size, bool centered, ando::Color color, ando::Color outlineColor, std::string fontName, const char * format, ...) {
 				std::shared_ptr<ISurfaceFont> font = this->renderer->getOrCreateFont(fontName, size);
 
@@ -62,21 +77,6 @@ namespace ando {
 				FORMAT_STRING(256);
 
 				this->DrawOutlinedString(x, y, ISURFACE_TEXT_SIZE_DEFAULT, ISURFACE_TEXT_CENTERED_DEFAULT, color, ando::colors::black, fontName, buffer);
-			}
-
-			void ISurfaceQueuedRenderer::DrawString(float x, float y, ando::Color color, std::string fontName, const char *format, ...) {
-				std::shared_ptr<ISurfaceFont> font = this->renderer->getOrCreateFont(fontName, ISURFACE_TEXT_SIZE_DEFAULT);
-
-				FORMAT_STRING(256);
-
-				this->DrawRawString(x, y, ISURFACE_TEXT_SIZE_DEFAULT, false, color, font, buffer);
-			}
-			void ISurfaceQueuedRenderer::DrawString(float x, float y, uint8_t size, bool centered, ando::Color color, std::string fontName, const char *format, ...) {
-				std::shared_ptr<ISurfaceFont> font = this->renderer->getOrCreateFont(fontName, size);
-
-				FORMAT_STRING(256);
-
-				this->DrawRawString(x, y, size, centered, color, font, buffer);
 			}
 
 			void ISurfaceQueuedRenderer::DrawOutlinedLine(float x1, float y1, float x2, float y2, ando::Color color, ando::Color outlineColor) {

@@ -6,12 +6,12 @@
 #endif
 
 #ifndef OVERLAY_RENDERER_NAME
-#define OVERLAY_RENDERER_NAME				D2D
+#define OVERLAY_RENDERER_NAME               D2D
 #endif
 
-#define OVERLAY_RENDERER_CLASS_NAME(x)		x ## Overlay
-#define OVERLAY_RENDERER_COMPLETE(x)		ando::overlay::concrete:: ## OVERLAY_RENDERER_CLASS_NAME(x)
-#define OVERLAY_RENDERER					OVERLAY_RENDERER_COMPLETE(OVERLAY_RENDERER_NAME)
+#define OVERLAY_RENDERER_CLASS_NAME(x)      x ## Overlay
+#define OVERLAY_RENDERER_COMPLETE(x)        ando::overlay::concrete:: ## OVERLAY_RENDERER_CLASS_NAME(x)
+#define OVERLAY_RENDERER                    OVERLAY_RENDERER_COMPLETE(OVERLAY_RENDERER_NAME)
 
 #if(OVERLAY_RENDERER_NAME == D2D)
 #include "D2DOverlay.hpp"

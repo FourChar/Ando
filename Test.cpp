@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
 		auto renderThread = overlay->runThreaded();
 
 		printf("Waiting for overlay to close...\r\n");
-		overlay->runExternal([&overlay](std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer) {
+		overlay->render([&overlay](std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer) {
 			renderer->DrawLine(10, 10, 100, 10, ando::colors::purples::wisteria);
 
 			renderer->DrawOutlinedLine(0.f, 0.f, overlay->getLocal().getWidth(), overlay->getLocal().getHeight(), ando::colors::red);

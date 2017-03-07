@@ -32,18 +32,10 @@ namespace ando {
 			return (this->renderThread = std::make_shared<std::thread>(std::bind(&ando::overlay::Overlay::run, this)));
 		}
 
-		void Overlay::runExternal(std::function<void(std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f) {
+		void Overlay::render(std::function<void(std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f) {
 			while (this->canRunExternaly()) {
 				f(this->queuedRenderer);
 			}
-		}
-
-		bool Overlay::canRunExternaly() {
-			if (!this->isRunning())
-				return false;
-
-			this->waitForEmptyQueue();
-			return true;
 		}
 
 		LRESULT CALLBACK Overlay::windowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -294,6 +286,13 @@ namespace ando {
 
 		void Overlay::waitForEmptyQueue() {
 			while (this->isRunning() && !this->queuedRenderer->getRenderQueue()->isQueueEmpty());
+		}
+		bool Overlay::canRunExternaly() {
+			if (!this->isRunning())
+				return false;
+
+			this->waitForEmptyQueue();
+			return true;
 		}
 	}
 };

@@ -71,7 +71,7 @@ namespace ando {
 			}
 
 			void DX9Overlay::onDestroy() {
-				this->running = false;
+				this->setRunning(false);
 
 				SafeRelease(&this->line);
 				SafeRelease(&this->renderDevice);

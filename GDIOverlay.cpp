@@ -21,7 +21,7 @@ namespace ando {
 			}
 
 			void GDIOverlay::onDestroy() {
-				this->running = false;
+				this->setRunning(false);
 			}
 			void GDIOverlay::onReset() {
 			}

@@ -9,37 +9,102 @@ namespace ando {
 	namespace overlay {
 		Overlay::Overlay() {
 			this->getTarget().setHwnd(0);
+			this->queuedRenderer = std::make_shared<ando::overlay::surface::ISurfaceQueuedRenderer>(this);
+			this->renderThread = nullptr;
 		}
 
 		Overlay::~Overlay() {
 			this->destroyWindow();
+
+			if (this->renderThread)
+				this->renderThread->join();
 		}
 
-		bool Overlay::RunFrame() {
-			if (!this->initialized) {
-				this->running = false;
-				return false;
+		bool Overlay::waitForWindow(std::string targetWindowName) {
+			while (this->getTarget().getHwnd() == NULL) {
+				this->getTarget().setHwnd(FindWindow(NULL, targetWindowName.c_str()));
+
+				using namespace std::chrono_literals;
+				std::this_thread::sleep_for(2s);
 			}
 
-			if (this->getTarget().getHwnd() != GetForegroundWindow())
-				return false;
+			this->getTarget().setWindowTitle(targetWindowName);
+			this->alignToTarget();
 
-			if (!this->BeginFrame())
-				return false;
-
-			if (!this->RenderFrame())
-				return false;
-
-			return this->EndFrame();
+			return true;
 		}
+		bool Overlay::createWindow() {
+			printf("Creating window class...\r\n");
+			WNDCLASSEX wcex;
 
-		bool Overlay::RenderFrame() {
-			this->renderQueue.processQueue(this);
+			wcex.cbSize = sizeof(WNDCLASSEX);
+			wcex.style = CS_HREDRAW | CS_VREDRAW;
+			wcex.lpfnWndProc = &Overlay::WindowProcessor;
+			wcex.cbClsExtra = 0;
+			wcex.cbWndExtra = sizeof(Overlay*);
+			wcex.hInstance = (HINSTANCE)GetWindowLong(this->getLocal().getHwnd(), GWL_HINSTANCE);
+			wcex.hCursor = LoadCursor(0, IDC_ARROW);
+			wcex.hIcon = LoadIcon(0, IDI_APPLICATION);
+			wcex.hIconSm = LoadIcon(0, IDI_APPLICATION);
+			wcex.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
+			wcex.lpszMenuName = "ando::Overlay";
+			wcex.lpszClassName = "ando::Overlay";
+
+			printf("Registering window...\r\n");
+			if (!RegisterClassEx(&wcex))
+				return false;
+
+			this->getLocal().setWindowTitle(wcex.lpszMenuName);
+
+			printf("Creating Window...\r\n");
+			HWND mainHandle = CreateWindowEx(
+				WS_EX_TOPMOST | WS_EX_COMPOSITED | WS_EX_TRANSPARENT | WS_EX_LAYERED,
+				wcex.lpszMenuName, wcex.lpszClassName,
+				WS_POPUP,
+				CW_USEDEFAULT, CW_USEDEFAULT,
+				this->getTarget().getWidth(),
+				this->getTarget().getHeight(),
+				0, 0, 0,
+				static_cast<LPVOID>(this));
+			if (!mainHandle)
+				return false;
+
+			this->getLocal().setHwnd(mainHandle);
+			this->getLocal().setX(this->getTarget().getX());
+			this->getLocal().setY(this->getTarget().getY());
+			this->getLocal().setWidth(this->getTarget().getWidth());
+			this->getLocal().setHeight(this->getTarget().getHeight());
+
+			ShowWindow(mainHandle, SW_SHOWDEFAULT);
+
+			if (!UpdateWindow(mainHandle))
+				return false;
+
+			if (!MoveWindow(mainHandle, this->getLocal().getX(), this->getLocal().getY(), this->getLocal().getWidth(), this->getLocal().getHeight(), TRUE))
+				return false;
+
+			SetForegroundWindow(this->getTarget().getHwnd());
+
 			return true;
 		}
 
-		void Overlay::onDestroy() {
-			this->running = false;
+		std::shared_ptr<std::thread> Overlay::runThreaded() {
+			this->renderMutex = std::make_unique<std::mutex>();
+			return (this->renderThread = std::make_shared<std::thread>(std::bind(&ando::overlay::Overlay::run, this)));
+		}
+
+		void Overlay::runExternal(std::function<void(std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f) {
+			while (this->canRunExternaly()) {
+				f(this->queuedRenderer);
+			}
+		}
+
+		bool Overlay::canRunExternaly() {
+			if (!this->isRunning())
+				return false;
+
+			this->waitForEmptyQueue();
+			return true;
 		}
 
 		LRESULT CALLBACK Overlay::windowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -88,122 +153,12 @@ namespace ando {
 			return DefWindowProcA(hWnd, message, wParam, lParam);
 		}
 
-		bool Overlay::waitForWindow(std::string targetWindowName) {
-			while (this->getTarget().getHwnd() == NULL) {
-				this->getTarget().setHwnd(FindWindow(NULL, targetWindowName.c_str()));
-
-				using namespace std::chrono_literals;
-				std::this_thread::sleep_for(2s);
-			}
-
-			this->getTarget().setWindowTitle(targetWindowName);
-			this->alignToTarget();
-
-			return true;
-		}
-
-		bool Overlay::createWindow() {
-			printf("Creating window class...\r\n");
-			WNDCLASSEX wcex;
-
-			wcex.cbSize = sizeof(WNDCLASSEX);
-			wcex.style = CS_HREDRAW | CS_VREDRAW;
-			wcex.lpfnWndProc = &Overlay::WindowProcessor;
-			wcex.cbClsExtra = 0;
-			wcex.cbWndExtra = sizeof(Overlay*);
-			wcex.hInstance = (HINSTANCE)GetWindowLong(this->getLocal().getHwnd(), GWL_HINSTANCE);
-			wcex.hCursor = LoadCursor(0, IDC_ARROW);
-			wcex.hIcon = LoadIcon(0, IDI_APPLICATION);
-			wcex.hIconSm = LoadIcon(0, IDI_APPLICATION);
-			wcex.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
-			wcex.lpszMenuName = "ando::Overlay";
-			wcex.lpszClassName = "ando::Overlay";
-
-			printf("Registering window...\r\n");
-			if (!RegisterClassEx(&wcex))
-				return false;
-
-			this->getLocal().setWindowTitle(wcex.lpszMenuName);
-
-			printf("Creating Window...\r\n");
-			HWND mainHandle = CreateWindowEx(
-								WS_EX_TOPMOST | WS_EX_COMPOSITED | WS_EX_TRANSPARENT | WS_EX_LAYERED,
-								wcex.lpszMenuName, wcex.lpszClassName, 
-								WS_POPUP, 
-								CW_USEDEFAULT, CW_USEDEFAULT,
-								this->getTarget().getWidth(),
-								this->getTarget().getHeight(),
-								0, 0, 0, 
-								static_cast<LPVOID>(this));
-			if(!mainHandle)
-				return false;
-
-			this->getLocal().setHwnd(mainHandle);
-			this->getLocal().setX(this->getTarget().getX());
-			this->getLocal().setY(this->getTarget().getY());
-			this->getLocal().setWidth(this->getTarget().getWidth());
-			this->getLocal().setHeight(this->getTarget().getHeight());
-
-			ShowWindow(mainHandle, SW_SHOWDEFAULT);
-
-			if (!UpdateWindow(mainHandle))
-				return false;
-
-			if (!MoveWindow(mainHandle, this->getLocal().getX(), this->getLocal().getY(), this->getLocal().getWidth(), this->getLocal().getHeight(), TRUE))
-				return false;
-
-			SetForegroundWindow(this->getTarget().getHwnd());
-
-			return true;
-		}
-
 		void Overlay::destroyWindow() {
+			this->running = false;
+
 			if(this->getLocal().getHwnd())
 				DestroyWindow(this->getLocal().getHwnd());
 		}
-
-		void Overlay::runThread() {
-			std::thread t(std::bind(&ando::overlay::Overlay::run, this));
-
-			t.join();
-		}
-
-		void Overlay::run() {
-			printf("Running Overlay...\r\n");
-
-			this->running = true;
-
-			MSG message;
-			uint8_t frameCounter = 0;
-
-			while(this->running) {
-				if(PeekMessage(&message, this->getLocal().getHwnd(), 0, 0, PM_REMOVE)) {
-					TranslateMessage(&message);
-					DispatchMessage(&message);
-				}
-				else {
-					if (frameCounter++ >= 254) {
-						frameCounter = 0;
-
-						printf("Searching for window...\r\n");
-						if (!FindWindowA(NULL, this->getTarget().getWindowTitle().c_str())) {
-							printf("Window closed!\r\n");
-							this->running = false;
-							break;
-						}
-					}
-
-					this->RunFrame();
-				}
-
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-
-			printf("Destroying window!\r\n");
-
-			this->destroyWindow();
-		}
-
 		void Overlay::alignToTarget() {
 			printf("Aligning Overlay to Target...\r\n");
 
@@ -235,8 +190,68 @@ namespace ando {
 			this->getLocal().setWidth(this->getTarget().getWidth());
 			this->getLocal().setHeight(this->getTarget().getHeight());
 
-			if(this->localInstance.getHwnd())
+			if (this->localInstance.getHwnd())
 				MoveWindow(this->getLocal().getHwnd(), this->getLocal().getX(), this->getLocal().getY(), this->getLocal().getWidth(), this->getLocal().getHeight(), TRUE);
+		}
+
+		bool Overlay::RunFrame() {
+			if (!this->initialized) {
+				this->running = false;
+				return false;
+			}
+
+			if (this->getTarget().getHwnd() != GetForegroundWindow())
+				return false;
+
+			if (!this->BeginFrame())
+				return false;
+
+			if (!this->RenderFrame())
+				return false;
+
+			return this->EndFrame();
+		}
+
+		bool Overlay::RenderFrame() {
+			this->queuedRenderer->getRenderQueue()->processQueue();
+			return true;
+		}
+		void Overlay::onDestroy() {
+			this->running = false;
+		}
+
+		void Overlay::run() {
+			printf("Running Overlay...\r\n");
+
+			this->running = true;
+
+			MSG message;
+			uint8_t frameCounter = 0;
+
+			while(this->running) {
+				if(PeekMessage(&message, this->getLocal().getHwnd(), 0, 0, PM_REMOVE)) {
+					TranslateMessage(&message);
+					DispatchMessage(&message);
+				}
+				else {
+					if (frameCounter++ >= 254) {
+						frameCounter = 0;
+
+						if (!FindWindowA(NULL, this->getTarget().getWindowTitle().c_str())) {
+							printf("Window closed!\r\n");
+							this->running = false;
+							break;
+						}
+					}
+
+					this->RunFrame();
+				}
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+
+			this->destroyWindow();
+			printf("Destroyed window!\r\n");
 		}
 
 		ando::OverlayInstance &Overlay::getTarget() {
@@ -249,17 +264,30 @@ namespace ando {
 		bool Overlay::isInitialized() const {
 			return this->initialized;
 		}
-
 		bool Overlay::isRunning() const {
-			return this->running;
+			if (this->renderMutex)
+				this->renderMutex->lock();
+			
+			bool result = this->running;
+
+			if (this->renderMutex)
+				this->renderMutex->unlock();
+
+			return result;
 		}
 
-		bool Overlay::canRunExternaly() const {
-			if (!this->isRunning())
-				return false;
+		void Overlay::setRunning(bool running) {
+			if (this->renderMutex)
+				this->renderMutex->lock();
 
-			this->waitForEmptyQueue();
-			return true;
+			this->running = running;
+
+			if (this->renderMutex)
+				this->renderMutex->unlock();
+		}
+
+		void Overlay::waitForEmptyQueue() {
+			while (this->isRunning() && !this->queuedRenderer->getRenderQueue()->isQueueEmpty());
 		}
 	}
 };

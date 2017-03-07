@@ -43,6 +43,7 @@ namespace ando {
 				D2DOverlay();
 				~D2DOverlay();
 
+			protected:
 				virtual bool initialize();
 
 				virtual bool BeginFrame();

@@ -8,39 +8,39 @@ namespace ando {
 	namespace overlay {
 		namespace surface {
 			namespace queue {
-				void ISurfaceQueue::processQueue(ISurfaceBasicRenderer *renderer) {
-					std::lock_guard<std::mutex> lock(this->_mutex);
+				ISurfaceQueue::ISurfaceQueue(ando::overlay::surface::ISurfaceFontRenderer *renderer) {
+					this->renderer = renderer;
+				}
+
+				void ISurfaceQueue::processQueue() {
+					std::lock_guard<std::mutex> guard(this->_mutex);
 
 					while (!this->queue.empty()) {
 						auto next = this->queue.front();
-						if (next == nullptr) {
-							this->queue.pop();
-							continue;
-						}
 
 						switch (next->getType()) {
 							case ESurfaceCall::DRAW_RAW_STRING: {
 								const ISurfaceSlotString *call = (const ISurfaceSlotString *)next.get();
 
-								renderer->DrawRawString(call->getX(), call->getY(), call->getSize(), call->isCentered(), call->getColor(), call->getFont(), call->getText().c_str());
+								this->renderer->DrawRawString(call->getX(), call->getY(), call->getSize(), call->isCentered(), call->getColor(), call->getFont(), call->getText().c_str());
 								break;
 							}
 							case ESurfaceCall::DRAW_LINE: {
 								const ISurfaceSlotLine *call = (const ISurfaceSlotLine *)next.get();
 
-								renderer->DrawLine(call->getX(), call->getY(), call->getX2(), call->getY2(), call->getColor());
+								this->renderer->DrawLine(call->getX(), call->getY(), call->getX2(), call->getY2(), call->getColor());
 								break;
 							}
 							case ESurfaceCall::DRAW_RECTANGLE: {
 								const ISurfaceSlotRectangle *call = (const ISurfaceSlotRectangle *)next.get();
 
-								renderer->DrawRectangle(call->getX(), call->getY(), call->getWidth(), call->getHeight(), call->getColor());
+								this->renderer->DrawRectangle(call->getX(), call->getY(), call->getWidth(), call->getHeight(), call->getColor());
 								break;
 							}
 							case ESurfaceCall::FILL_RECTANGLE: {
 								const ISurfaceSlotRectangle *call = (const ISurfaceSlotRectangle *)next.get();
 
-								renderer->FillRectangle(call->getX(), call->getY(), call->getWidth(), call->getHeight(), call->getColor());
+								this->renderer->FillRectangle(call->getX(), call->getY(), call->getWidth(), call->getHeight(), call->getColor());
 								break;
 							}
 						}
@@ -49,13 +49,11 @@ namespace ando {
 					}
 				}
 
-				bool ISurfaceQueue::isQueueEmpty() const {
+				bool ISurfaceQueue::isQueueEmpty() {
 					return this->queue.empty();
 				}
 
 				void ISurfaceQueue::DrawRawString(float x, float y, uint8_t size, bool centered, ando::Color color, std::shared_ptr<ISurfaceFont> font, const char *string) {
-					std::lock_guard<std::mutex> lock(this->_mutex);
-
 					std::shared_ptr<ISurfaceSlotString> newSlot = std::make_shared<ISurfaceSlotString>();
 
 					newSlot->setX(x);
@@ -66,11 +64,11 @@ namespace ando {
 					newSlot->setFont(font);
 					newSlot->setText(string);
 
+					this->_mutex.lock();
 					this->queue.push(newSlot);
+					this->_mutex.unlock();
 				}
 				void ISurfaceQueue::DrawLine(float x1, float y1, float x2, float y2, ando::Color color) {
-					std::lock_guard<std::mutex> lock(this->_mutex);
-
 					std::shared_ptr<ISurfaceSlotLine> newSlot = std::make_shared<ISurfaceSlotLine>();
 
 					newSlot->setX(x1);
@@ -79,11 +77,11 @@ namespace ando {
 					newSlot->setY2(y2);
 					newSlot->setColor(color);
 
+					this->_mutex.lock();
 					this->queue.push(newSlot);
+					this->_mutex.unlock();
 				}
 				void ISurfaceQueue::DrawRectangle(float x, float y, float width, float height, ando::Color color) {
-					std::lock_guard<std::mutex> lock(this->_mutex);
-
 					std::shared_ptr<ISurfaceSlotRectangle> newSlot = std::make_shared<ISurfaceSlotRectangle>();
 
 					newSlot->setX(x);
@@ -92,11 +90,11 @@ namespace ando {
 					newSlot->setHeight(height);
 					newSlot->setColor(color);
 
+					this->_mutex.lock();
 					this->queue.push(newSlot);
+					this->_mutex.unlock();
 				}
 				void ISurfaceQueue::FillRectangle(float x, float y, float width, float height, ando::Color color) {
-					std::lock_guard<std::mutex> lock(this->_mutex);
-
 					std::shared_ptr<ISurfaceSlotRectangle> newSlot = std::make_shared<ISurfaceSlotRectangle>(true);
 
 					newSlot->setX(x);
@@ -105,7 +103,9 @@ namespace ando {
 					newSlot->setHeight(height);
 					newSlot->setColor(color);
 
+					this->_mutex.lock();
 					this->queue.push(newSlot);
+					this->_mutex.unlock();
 				}
 			}
 		}

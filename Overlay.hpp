@@ -22,8 +22,7 @@ namespace ando {
 			Overlay();
 			~Overlay();
 
-			bool waitForWindow(std::string targetWindowName);
-			bool createWindow();
+			bool bindToWindow(std::string targetWindowName);
 
 			std::shared_ptr<std::thread> runThreaded();
 			void runExternal(std::function<void(std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f);
@@ -32,6 +31,9 @@ namespace ando {
 
 		protected:
 			virtual LRESULT CALLBACK windowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+			bool waitForWindow(std::string targetWindowName);
+			bool createWindow();
 
 			void destroyWindow();
 			void alignToTarget();
@@ -49,7 +51,7 @@ namespace ando {
 					SetWindowLongPtrW(hWnd, 0, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
 				}
 
-				Overlay *overlay = reinterpret_cast<Overlay*>(GetWindowLongPtrW(hWnd, 0));
+				auto overlay = reinterpret_cast<ando::overlay::Overlay *>(GetWindowLongPtrW(hWnd, 0));
 
 				if(overlay) {
 					if(message == WM_NCDESTROY) {
@@ -63,8 +65,8 @@ namespace ando {
 			}
 
 		public:
-			ando::OverlayInstance &getTarget();
-			ando::OverlayInstance &getLocal();
+			ando::overlay::OverlayInstance &getTarget();
+			ando::overlay::OverlayInstance &getLocal();
 
 		protected:
 			bool isInitialized() const;
@@ -75,8 +77,8 @@ namespace ando {
 			void waitForEmptyQueue();
 
 		protected:
-			ando::OverlayInstance targetInstance;
-			ando::OverlayInstance localInstance;
+			ando::overlay::OverlayInstance targetInstance;
+			ando::overlay::OverlayInstance localInstance;
 			
 		private:
 			bool initialized;

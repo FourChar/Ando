@@ -20,72 +20,11 @@ namespace ando {
 				this->renderThread->join();
 		}
 
-		bool Overlay::waitForWindow(std::string targetWindowName) {
-			while (this->getTarget().getHwnd() == NULL) {
-				this->getTarget().setHwnd(FindWindow(NULL, targetWindowName.c_str()));
-
-				using namespace std::chrono_literals;
-				std::this_thread::sleep_for(2s);
-			}
-
-			this->getTarget().setWindowTitle(targetWindowName);
-			this->alignToTarget();
-
-			return true;
-		}
-		bool Overlay::createWindow() {
-			printf("Creating window class...\r\n");
-			WNDCLASSEX wcex;
-
-			wcex.cbSize = sizeof(WNDCLASSEX);
-			wcex.style = CS_HREDRAW | CS_VREDRAW;
-			wcex.lpfnWndProc = &Overlay::WindowProcessor;
-			wcex.cbClsExtra = 0;
-			wcex.cbWndExtra = sizeof(Overlay*);
-			wcex.hInstance = (HINSTANCE)GetWindowLong(this->getLocal().getHwnd(), GWL_HINSTANCE);
-			wcex.hCursor = LoadCursor(0, IDC_ARROW);
-			wcex.hIcon = LoadIcon(0, IDI_APPLICATION);
-			wcex.hIconSm = LoadIcon(0, IDI_APPLICATION);
-			wcex.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
-			wcex.lpszMenuName = "ando::Overlay";
-			wcex.lpszClassName = "ando::Overlay";
-
-			printf("Registering window...\r\n");
-			if (!RegisterClassEx(&wcex))
+		bool Overlay::bindToWindow(std::string targetWindowName) {
+			if (!this->waitForWindow(targetWindowName))
 				return false;
 
-			this->getLocal().setWindowTitle(wcex.lpszMenuName);
-
-			printf("Creating Window...\r\n");
-			HWND mainHandle = CreateWindowEx(
-				WS_EX_TOPMOST | WS_EX_COMPOSITED | WS_EX_TRANSPARENT | WS_EX_LAYERED,
-				wcex.lpszMenuName, wcex.lpszClassName,
-				WS_POPUP,
-				CW_USEDEFAULT, CW_USEDEFAULT,
-				this->getTarget().getWidth(),
-				this->getTarget().getHeight(),
-				0, 0, 0,
-				static_cast<LPVOID>(this));
-			if (!mainHandle)
-				return false;
-
-			this->getLocal().setHwnd(mainHandle);
-			this->getLocal().setX(this->getTarget().getX());
-			this->getLocal().setY(this->getTarget().getY());
-			this->getLocal().setWidth(this->getTarget().getWidth());
-			this->getLocal().setHeight(this->getTarget().getHeight());
-
-			ShowWindow(mainHandle, SW_SHOWDEFAULT);
-
-			if (!UpdateWindow(mainHandle))
-				return false;
-
-			if (!MoveWindow(mainHandle, this->getLocal().getX(), this->getLocal().getY(), this->getLocal().getWidth(), this->getLocal().getHeight(), TRUE))
-				return false;
-
-			SetForegroundWindow(this->getTarget().getHwnd());
-
-			return true;
+			return this->createWindow();
 		}
 
 		std::shared_ptr<std::thread> Overlay::runThreaded() {
@@ -151,6 +90,73 @@ namespace ando {
 			}
 
 			return DefWindowProcA(hWnd, message, wParam, lParam);
+		}
+
+		bool Overlay::waitForWindow(std::string targetWindowName) {
+			while (this->getTarget().getHwnd() == NULL) {
+				this->getTarget().setHwnd(FindWindow(NULL, targetWindowName.c_str()));
+
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+			}
+
+			this->getTarget().setWindowTitle(targetWindowName);
+			this->alignToTarget();
+
+			return true;
+		}
+		bool Overlay::createWindow() {
+			printf("Creating window class...\r\n");
+			WNDCLASSEX wcex;
+
+			wcex.cbSize = sizeof(WNDCLASSEX);
+			wcex.style = CS_HREDRAW | CS_VREDRAW;
+			wcex.lpfnWndProc = &ando::overlay::Overlay::WindowProcessor;
+			wcex.cbClsExtra = 0;
+			wcex.cbWndExtra = sizeof(ando::overlay::Overlay *);
+			wcex.hInstance = (HINSTANCE)GetWindowLong(this->getLocal().getHwnd(), GWL_HINSTANCE);
+			wcex.hCursor = LoadCursor(0, IDC_ARROW);
+			wcex.hIcon = LoadIcon(0, IDI_APPLICATION);
+			wcex.hIconSm = LoadIcon(0, IDI_APPLICATION);
+			wcex.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
+			wcex.lpszMenuName = "ando::Overlay";
+			wcex.lpszClassName = "ando::Overlay";
+
+			printf("Registering window...\r\n");
+			if (!RegisterClassEx(&wcex))
+				return false;
+
+			this->getLocal().setWindowTitle(wcex.lpszMenuName);
+
+			printf("Creating Window...\r\n");
+			HWND mainHandle = CreateWindowEx(
+				WS_EX_TOPMOST | WS_EX_COMPOSITED | WS_EX_TRANSPARENT | WS_EX_LAYERED,
+				wcex.lpszMenuName, wcex.lpszClassName,
+				WS_POPUP,
+				CW_USEDEFAULT, CW_USEDEFAULT,
+				this->getTarget().getWidth(),
+				this->getTarget().getHeight(),
+				0, 0, 0,
+				static_cast<LPVOID>(this));
+			if (!mainHandle)
+				return false;
+
+			this->getLocal().setHwnd(mainHandle);
+			this->getLocal().setX(this->getTarget().getX());
+			this->getLocal().setY(this->getTarget().getY());
+			this->getLocal().setWidth(this->getTarget().getWidth());
+			this->getLocal().setHeight(this->getTarget().getHeight());
+
+			ShowWindow(mainHandle, SW_SHOWDEFAULT);
+
+			if (!UpdateWindow(mainHandle))
+				return false;
+
+			if (!MoveWindow(mainHandle, this->getLocal().getX(), this->getLocal().getY(), this->getLocal().getWidth(), this->getLocal().getHeight(), TRUE))
+				return false;
+
+			SetForegroundWindow(this->getTarget().getHwnd());
+
+			return true;
 		}
 
 		void Overlay::destroyWindow() {
@@ -254,10 +260,10 @@ namespace ando {
 			printf("Destroyed window!\r\n");
 		}
 
-		ando::OverlayInstance &Overlay::getTarget() {
+		ando::overlay::OverlayInstance &Overlay::getTarget() {
 			return this->targetInstance;
 		}
-		ando::OverlayInstance &Overlay::getLocal() {
+		ando::overlay::OverlayInstance &Overlay::getLocal() {
 			return this->localInstance;
 		}
 

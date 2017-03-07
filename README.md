@@ -6,6 +6,7 @@ You'll first have to define `OVERLAY_RENDERER_NAME` with the shorthand of the re
 #define OVERLAY_RENDERER_NAME D2D
 ```
 You've got a choice of any of the following:
+
 Shorthand | Renderer
 --------- | --------
 `D2D`     | Direct2D

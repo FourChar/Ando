@@ -2,19 +2,26 @@
 
 ## Overlay Example
 ```C++
-ando::overlay::Overlay *overlay = new ando::overlay::concrete::D2DOverlay();
+#define OVERLAY_RENDERER_NAME		D2D
+
+#include "OverlayIncluder.hpp"
+
+auto overlay = new OVERLAY_RENDERER();
 	
 overlay->waitForWindow("Calculator");
 
 if (overlay->createWindow()) {
-    std::thread runThread(std::bind(&ando::overlay::Overlay::run, overlay));
+    auto renderThread = overlay->runThreaded();
 
-    while (overlay->canRunExternaly()) {
-        overlay->DrawOutlinedLine(0, 0, overlay->getLocal().getWidth(), overlay->getLocal().getHeight(), ando::colors::red);
-        overlay->DrawOutlinedLine(overlay->getLocal().getWidth(), 0, 0, overlay->getLocal().getHeight(), ando::colors::red);
-        overlay->FillOutlinedRectangle(50, 50, 500, 500, ando::Color(ando::colors::white).setA(200));
+	overlay->runExternal([&overlay](std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer) {
+		renderer->DrawLine(10, 10, 100, 10, ando::colors::purples::wisteria);
 
-        overlay->DrawOutlinedString(55, 55, ando::colors::green, "Arial", "Sean sucks!");
-    }
+		renderer->DrawOutlinedLine(0, 0, overlay->getLocal().getWidth(), overlay->getLocal().getHeight(), ando::colors::red);
+		renderer->DrawOutlinedLine(overlay->getLocal().getWidth(), 0, 0, overlay->getLocal().getHeight(), ando::colors::red);
+		renderer->FillOutlinedRectangle(50, 50, 100, 100, ando::colors::reds::mexicanRed);
+
+		renderer->DrawOutlinedString(55, 55, ando::colors::blues::blizzardBlue, "Arial", "Ando Overlay Arial");
+		renderer->DrawOutlinedString(55, 75, ando::colors::blues::blizzardBlue, "Comic Sans MS", "Sean sucks!");
+	});
 }
 ```

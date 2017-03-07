@@ -57,7 +57,7 @@ if (overlay->bindToWindow("Calculator")) {
 ## Drawing Methods
 The drawing methods you should be concerned with reside in `ando::overlay::surface::ISurfaceQueuedRenderer` and are as follows:
 
-#### Strings
+### Strings
 
 | Function Name      | Arguments |
 | ------------------ | --------- |
@@ -70,14 +70,14 @@ The drawing methods you should be concerned with reside in `ando::overlay::surfa
 | DrawOutlinedString | `float x`, `float y`, `ando::Color color`, `ando::Color outlineColor`, `std::string fontName`, `const char *format`, `...` |
 | DrawOutlinedString | `float x`, `float y`, `ando::Color color`, `std::string fontName`, `const char *format`, `...`
 
-#### Lines
+### Lines
 
 | Function Name    | Arguments |
 | ---------------- | --------- |
 | DrawLine         | `float x1`, `float y1`, `float x2`, `float y2`, `ando::Color color` |
 | DrawOutlinedLine | `float x1`, `float y1`, `float x2`, `float y2`, `ando::Color color`, `ando::Color outlineColor = ando::colors::black` |
 
-#### Rectangles
+### Rectangles
 
 | Function Name         | Arguments |
 | --------------------- | --------- |

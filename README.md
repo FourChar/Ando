@@ -1,5 +1,25 @@
 # Ando Framework
 
+## Overlay Example
+```C++
+auto overlay = new OVERLAY_RENDERER();
+
+if (overlay->bindToWindow("Calculator")) {
+    auto renderThread = overlay->runThreaded();
+
+	overlay->runExternal([&overlay](std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer) {
+		renderer->DrawLine(10, 10, 100, 10, ando::colors::purples::wisteria);
+
+		renderer->DrawOutlinedLine(0, 0, overlay->getLocal().getWidth(), overlay->getLocal().getHeight(), ando::colors::red);
+		renderer->DrawOutlinedLine(overlay->getLocal().getWidth(), 0, 0, overlay->getLocal().getHeight(), ando::colors::red);
+		renderer->FillOutlinedRectangle(50, 50, 100, 100, ando::colors::reds::mexicanRed);
+
+		renderer->DrawOutlinedString(55, 55, ando::colors::blues::blizzardBlue, "Arial", "Ando Overlay Arial");
+		renderer->DrawOutlinedString(55, 75, ando::colors::blues::blizzardBlue, "Comic Sans MS", "Sean sucks!");
+	});
+}
+```
+
 ## How to use OverlayIncluder.hpp
 You'll first have to define `OVERLAY_RENDERER_NAME` with the shorthand of the renderer you'd like to use:
 ```C++
@@ -32,26 +52,6 @@ For example:
 auto overlayInstance = new OVERLAY_RENDERER();
 // Same as:
 // auto overlayInstance = new ando::overlay::concrete::D2DOverlay();
-```
-
-## Overlay Example
-```C++
-auto overlay = new OVERLAY_RENDERER();
-
-if (overlay->bindToWindow("Calculator")) {
-    auto renderThread = overlay->runThreaded();
-
-	overlay->runExternal([&overlay](std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer) {
-		renderer->DrawLine(10, 10, 100, 10, ando::colors::purples::wisteria);
-
-		renderer->DrawOutlinedLine(0, 0, overlay->getLocal().getWidth(), overlay->getLocal().getHeight(), ando::colors::red);
-		renderer->DrawOutlinedLine(overlay->getLocal().getWidth(), 0, 0, overlay->getLocal().getHeight(), ando::colors::red);
-		renderer->FillOutlinedRectangle(50, 50, 100, 100, ando::colors::reds::mexicanRed);
-
-		renderer->DrawOutlinedString(55, 55, ando::colors::blues::blizzardBlue, "Arial", "Ando Overlay Arial");
-		renderer->DrawOutlinedString(55, 75, ando::colors::blues::blizzardBlue, "Comic Sans MS", "Sean sucks!");
-	});
-}
 ```
 
 ## Drawing Methods

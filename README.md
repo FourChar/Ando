@@ -7,7 +7,7 @@ auto overlay = new OVERLAY_RENDERER();
 if (overlay->bindToWindow("Calculator")) {
     overlay->runThreaded();
 
-    overlay->render([&overlay](::std::shared_ptr<std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer) {
+    overlay->render([&overlay](std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer) {
         renderer->DrawLine(10, 10, 100, 10, ando::colors::purples::wisteria);
 
         renderer->DrawOutlinedLine(0, 0, overlay->getLocal().getWidth<>(), overlay->getLocal().getHeight<>(), ando::colors::red);
@@ -21,8 +21,8 @@ if (overlay->bindToWindow("Calculator")) {
         ando::math::Rect<> crosshair;
         crosshair.setWidth(20.0f);
         crosshair.setHeight(20.0f);
-		crosshair.setX((overlay->getTarget()->getWidth<>() / 2.f) - (crosshair.getWidth() / 2.f));
-		crosshair.setY((overlay->getTarget()->getHeight<>() / 2.f) - (crosshair.getHeight() / 2.f));
+        crosshair.setX((overlay->getTarget()->getWidth<>() / 2.f) - (crosshair.getWidth() / 2.f));
+        crosshair.setY((overlay->getTarget()->getHeight<>() / 2.f) - (crosshair.getHeight() / 2.f));
 		
         renderer->DrawOutlinedRectangle(crosshair.getX(), crosshair.getY(), crosshair.getWidth(), crosshair.getHeight(), ando::Color(ando::colors::white).setA(75));
         renderer->DrawLine(crosshair.getX(), crosshair.getY(), crosshair.getX() + crosshair.getWidth(), crosshair.getY() + crosshair.getHeight(), ando::Color(ando::colors::green).setA(220));

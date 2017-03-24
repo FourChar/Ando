@@ -31,10 +31,10 @@ namespace ando {
 					std::string getText() const;
 
 				public: // Setters
-					void setFont(std::shared_ptr<ando::overlay::surface::ISurfaceFont> font);
+					void setFont(::std::shared_ptr<ando::overlay::surface::ISurfaceFont> font);
 					void setSize(uint8_t size);
 					void setCentered(bool centered);
-					void setText(std::string text);
+					void setText(::std::string text);
 				};
 			}
 		}

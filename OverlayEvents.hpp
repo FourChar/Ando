@@ -10,8 +10,8 @@ namespace ando {
 		class OverlayEvents {
 		public:
 			virtual void onDestroy() = 0;
-			virtual void onReset() = 0;
 			virtual void onRelease() = 0;
+			virtual void onReset() = 0;
 			virtual void onResize() = 0;
 		};
 	}

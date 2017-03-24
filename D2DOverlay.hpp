@@ -41,6 +41,7 @@ namespace ando {
 
 			public:
 				D2DOverlay();
+				D2DOverlay(::std::shared_ptr<ando::logger::ILogger> logger);
 				~D2DOverlay();
 
 			protected:
@@ -56,7 +57,7 @@ namespace ando {
 
 				virtual bool FontInitializer(const ando::overlay::surface::ISurfaceFont *font);
 
-				virtual void DrawRawString(float x, float y, uint8_t size, bool centered, ando::Color color, std::shared_ptr<ando::overlay::surface::ISurfaceFont> font, const char *string);
+				virtual void DrawRawString(float x, float y, uint8_t size, bool centered, ando::Color color, ::std::shared_ptr<ando::overlay::surface::ISurfaceFont> font, const char *string);
 				virtual void DrawLine(float x1, float y1, float x2, float y2, ando::Color color);
 				virtual void DrawRectangle(float x, float y, float width, float height, ando::Color color);
 				virtual void FillRectangle(float x, float y, float width, float height, ando::Color color);

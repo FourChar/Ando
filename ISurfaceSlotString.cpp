@@ -10,7 +10,7 @@ namespace ando {
 				}
 
 				// Getters
-				std::shared_ptr<ando::overlay::surface::ISurfaceFont> ISurfaceSlotString::getFont() const {
+				::std::shared_ptr<ando::overlay::surface::ISurfaceFont> ISurfaceSlotString::getFont() const {
 					return this->font;
 				}
 				uint8_t ISurfaceSlotString::getSize() const {
@@ -19,12 +19,12 @@ namespace ando {
 				bool ISurfaceSlotString::isCentered() const {
 					return this->centered;
 				}
-				std::string ISurfaceSlotString::getText() const {
+				::std::string ISurfaceSlotString::getText() const {
 					return this->text;
 				}
 
 				// Setters
-				void ISurfaceSlotString::setFont(std::shared_ptr<ando::overlay::surface::ISurfaceFont> font) {
+				void ISurfaceSlotString::setFont(::std::shared_ptr<ando::overlay::surface::ISurfaceFont> font) {
 					this->font = font;
 				}
 				void ISurfaceSlotString::setSize(uint8_t size) {
@@ -33,7 +33,7 @@ namespace ando {
 				void ISurfaceSlotString::setCentered(bool centered) {
 					this->centered = centered;
 				}
-				void ISurfaceSlotString::setText(std::string text) {
+				void ISurfaceSlotString::setText(::std::string text) {
 					this->text = text;
 				}
 			}

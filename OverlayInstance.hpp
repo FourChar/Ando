@@ -22,7 +22,7 @@ namespace ando {
 		public:
 			OverlayInstance();
 
-			void setWindowTitle(std::string windowTitle);
+			void setWindowTitle(::std::string windowTitle);
 			void setHwnd(HWND hWnd);
 
 			std::string getWindowTitle() const;

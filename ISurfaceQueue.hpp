@@ -20,7 +20,7 @@ namespace ando {
 				class ISurfaceQueue : public ando::overlay::surface::ISurfaceBasicRenderer {
 				private:
 					std::mutex _mutex;
-					std::queue<std::shared_ptr<ando::overlay::surface::queue::ISurfaceSlot>> queue;
+					std::queue<ando::overlay::surface::queue::ISurfaceSlot *> queue;
 					ando::overlay::surface::ISurfaceFontRenderer *renderer;
 
 				public:
@@ -32,7 +32,7 @@ namespace ando {
 					bool isQueueEmpty();
 
 				public:
-					virtual void DrawRawString(float x, float y, uint8_t size, bool centered, ando::Color color, std::shared_ptr<ando::overlay::surface::ISurfaceFont> font, const char *string);
+					virtual void DrawRawString(float x, float y, uint8_t size, bool centered, ando::Color color, ::std::shared_ptr<ando::overlay::surface::ISurfaceFont> font, const char *string);
 					virtual void DrawLine(float x1, float y1, float x2, float y2, ando::Color color);
 					virtual void DrawRectangle(float x, float y, float width, float height, ando::Color color);
 					virtual void FillRectangle(float x, float y, float width, float height, ando::Color color);

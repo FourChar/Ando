@@ -3,7 +3,7 @@
 namespace ando {
 	namespace overlay {
 		namespace surface {
-			ISurfaceFont::ISurfaceFont(const std::string name, const uint8_t size, const uint16_t weight, const bool italics) {
+			ISurfaceFont::ISurfaceFont(const ::std::string name, const uint8_t size, const uint16_t weight, const bool italics) {
 				this->initialized = false;
 				this->name = name;
 				this->size = size;
@@ -11,7 +11,7 @@ namespace ando {
 				this->italics = italics;
 				this->font = nullptr;
 			}
-			ISurfaceFont::ISurfaceFont(const std::string name, const uint8_t size, const uint16_t weight, const bool italics, fontInitializer initializer) {
+			ISurfaceFont::ISurfaceFont(const ::std::string name, const uint8_t size, const uint16_t weight, const bool italics, fontInitializer initializer) {
 				this->initialized = false;
 				this->name = name;
 				this->size = size;
@@ -39,7 +39,7 @@ namespace ando {
 			bool ISurfaceFont::isInitialized() const {
 				return this->initialized;
 			}
-			std::string ISurfaceFont::getName() const {
+			::std::string ISurfaceFont::getName() const {
 				return this->name;
 			}
 			uint8_t ISurfaceFont::getSize() const {
@@ -59,7 +59,7 @@ namespace ando {
 			void ISurfaceFont::setInitialized(bool initialized) {
 				this->initialized = initialized;
 			}
-			void ISurfaceFont::setName(std::string name) {
+			void ISurfaceFont::setName(::std::string name) {
 				this->name = name;
 			}
 			void ISurfaceFont::setSize(uint8_t size) {

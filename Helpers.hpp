@@ -22,6 +22,6 @@ struct deletable_facet : Facet {
 	using Facet::Facet;
 };
 
-typedef std::wstring_convert<deletable_facet<std::codecvt<wchar_t, char, std::mbstate_t>>> stringConvertor;
+typedef ::std::wstring_convert<deletable_facet<::std::codecvt<wchar_t, char, ::std::mbstate_t>>> stringConvertor;
 
 #endif // HELPERS_HPP

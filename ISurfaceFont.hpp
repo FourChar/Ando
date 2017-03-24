@@ -19,7 +19,7 @@ namespace ando {
 		namespace surface {
 			class ISurfaceFont;
 
-			typedef std::function<bool(const ando::overlay::surface::ISurfaceFont *font)> fontInitializer;
+			typedef ::std::function<bool(const ando::overlay::surface::ISurfaceFont *font)> fontInitializer;
 
 			class ISurfaceFont {
 			private:
@@ -31,8 +31,8 @@ namespace ando {
 				void *font;
 
 			public:
-				ISurfaceFont(const std::string name, const uint8_t size = ISURFACE_TEXT_SIZE_DEFAULT, const uint16_t weight = ISURFACE_TEXT_WEIGHT_DEFAULT, const bool italics = ISURFACE_TEXT_ITALICS_DEFAULT);
-				ISurfaceFont(const std::string name, const uint8_t size, const uint16_t weight, const bool italics, fontInitializer initializer);
+				ISurfaceFont(const ::std::string name, const uint8_t size = ISURFACE_TEXT_SIZE_DEFAULT, const uint16_t weight = ISURFACE_TEXT_WEIGHT_DEFAULT, const bool italics = ISURFACE_TEXT_ITALICS_DEFAULT);
+				ISurfaceFont(const ::std::string name, const uint8_t size, const uint16_t weight, const bool italics, fontInitializer initializer);
 
 				~ISurfaceFont();
 
@@ -52,7 +52,7 @@ namespace ando {
 
 			public: // Setters
 				void setInitialized(bool initialized);
-				void setName(std::string name);
+				void setName(::std::string name);
 				void setSize(uint8_t size);
 				void setWeight(uint16_t weight);
 				void setItalics(bool italics);

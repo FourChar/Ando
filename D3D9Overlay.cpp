@@ -14,12 +14,12 @@ namespace ando {
 
 				this->presentParams.Windowed = TRUE;
 				this->presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-				this->presentParams.hDeviceWindow = this->localInstance.getHwnd();
+				this->presentParams.hDeviceWindow = this->getLocal()->getHwnd();
 				this->presentParams.MultiSampleType = D3DMULTISAMPLE_NONE;
 				this->presentParams.MultiSampleQuality = D3DMULTISAMPLE_NONE;
 				this->presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
-				this->presentParams.BackBufferWidth = this->localInstance.getWidth();
-				this->presentParams.BackBufferHeight = this->localInstance.getHeight();
+				this->presentParams.BackBufferWidth = this->getLocal()->getWidth();
+				this->presentParams.BackBufferHeight = this->getLocal()->getHeight();
 				this->presentParams.EnableAutoDepthStencil = TRUE;
 				this->presentParams.AutoDepthStencilFormat = D3DFMT_D16;
 				this->presentParams.PresentationInterval = 0x80000000L;
@@ -30,7 +30,7 @@ namespace ando {
 					this->presentParams.MultiSampleQuality = multiSampleQuality - 1;
 				}
 
-				if (FAILED(this->object->CreateDeviceEx(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, this->localInstance.getHwnd(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &this->presentParams, 0, &this->renderDevice))) {
+				if (FAILED(this->object->CreateDeviceEx(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, this->getLocal()->getHwnd(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &this->presentParams, 0, &this->renderDevice))) {
 					this->onDestroy();
 					return false;
 				}
@@ -56,7 +56,7 @@ namespace ando {
 			bool D3D9Overlay::RenderFrame() {
 				printf("RenderFrame\r\n");
 				this->DrawLine(10, 10, 20, 20, ando::colors::green);
-				this->DrawRectangle(this->localInstance.getX() + 5.f, this->localInstance.getY() + 5.f, 200.f, 200.f, ando::Color(0xFFFFFFFF));
+				this->DrawRectangle(this->getLocal()->getX() + 5.f, this->getLocal()->getY() + 5.f, 200.f, 200.f, ando::Color(0xFFFFFFFF));
 				return true;
 			}
 			bool D3D9Overlay::EndFrame() {

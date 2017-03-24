@@ -5,12 +5,30 @@
 
 #include "Overlay.hpp"
 
+#include "ELogLevel.hpp"
+
+using ando::logger::ELogLevel;
+
+// TODO: Create seperate thread for everything window related
 namespace ando {
 	namespace overlay {
 		Overlay::Overlay() {
-			this->getTarget().setHwnd(0);
-			this->queuedRenderer = std::make_shared<ando::overlay::surface::ISurfaceQueuedRenderer>(this);
+			this->targetInstance = ::std::make_shared<ando::overlay::OverlayInstance>();
+			this->localInstance = ::std::make_shared<ando::overlay::OverlayInstance>();
+			this->queuedRenderer = ::std::make_shared<ando::overlay::surface::ISurfaceQueuedRenderer>(this);
+
+			this->getTarget()->setHwnd(0);
 			this->renderThread = nullptr;
+			this->logger = ::std::make_shared<::ando::logger::ISafeLogger>();
+		}
+		Overlay::Overlay(::std::shared_ptr<ando::logger::ILogger> logger) {
+			this->targetInstance = ::std::make_shared<ando::overlay::OverlayInstance>();
+			this->localInstance = ::std::make_shared<ando::overlay::OverlayInstance>();
+			this->queuedRenderer = ::std::make_shared<ando::overlay::surface::ISurfaceQueuedRenderer>(this);
+
+			this->getTarget()->setHwnd(0);
+			this->renderThread = nullptr;
+			this->logger = ::std::make_shared<::ando::logger::ISafeLogger>(logger);
 		}
 
 		Overlay::~Overlay() {
@@ -20,7 +38,7 @@ namespace ando {
 				this->renderThread->join();
 		}
 
-		bool Overlay::bindToWindow(std::string targetWindowName) {
+		bool Overlay::bindToWindow(::std::string targetWindowName) {
 			if (!this->waitForWindow(targetWindowName))
 				return false;
 
@@ -28,11 +46,15 @@ namespace ando {
 		}
 
 		std::shared_ptr<std::thread> Overlay::runThreaded() {
-			this->renderMutex = std::make_unique<std::mutex>();
-			return (this->renderThread = std::make_shared<std::thread>(std::bind(&ando::overlay::Overlay::run, this)));
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::runThreaded} Starting renderThread...");
+
+			this->renderMutex = ::std::make_unique<std::mutex>();
+			return (this->renderThread = ::std::make_shared<std::thread>(::std::bind(&ando::overlay::Overlay::run, this)));
 		}
 
-		void Overlay::render(std::function<void(std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f) {
+		void Overlay::render(::std::function<void(::std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f) {
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::render} Starting external renderer...");
+
 			while (this->canRunExternaly()) {
 				f(this->queuedRenderer);
 			}
@@ -41,42 +63,48 @@ namespace ando {
 		LRESULT CALLBACK Overlay::windowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 			switch (message) {
 				case WM_CREATE: {
-					printf("Creating Overlay window...\r\n");
-					this->getLocal().setHwnd(hWnd);
+					this->logger->log(ELogLevel::LOG_INFO, "{Overlay::windowProc} Creating Overlay window...");
+					this->getLocal()->setHwnd(hWnd);
 
 					SetLayeredWindowAttributes(hWnd, (COLORREF)RGB(0, 0, 0), (BYTE)255, LWA_COLORKEY | LWA_ALPHA);
 
 					MARGINS margin = { -1, -1, -1, -1 };
 					DwmExtendFrameIntoClientArea(hWnd, &margin);
 
-					printf("Initializing Overlay...\r\n");
+					this->logger->log(ELogLevel::LOG_INFO, "{Overlay::windowProc} Initializing Overlay...");
 					this->initialized = this->initialize();
 
-					if (this->initialized)
-						printf("Initialized Overlay...\r\n");
-					else
-						printf("Failed to initialize Overlay!\r\n");
+					if (this->isInitialized()) {
+						this->logger->log(ELogLevel::LOG_INFO, "{Overlay::windowProc} Initialized Overlay...");
+					}
+					else {
+						this->logger->log(ELogLevel::LOG_ERROR, "{Overlay::windowProc} Failed to initialize Overlay!");
+					}
 
 					break;
 				}
 				case WM_DESTROY: {
-					printf("Destroying Overlay...\r\n");
+					this->logger->log(ELogLevel::LOG_INFO, "{Overlay::windowProc} Destroying Overlay...");
 					this->onDestroy();
 
 					PostQuitMessage(1);
 					return 1;
 				}
+				case WM_SIZE:
+				case WM_MOVE: {
+					if(this->isInitialized())
+						this->onResize();
+
+					break;
+				}
 				case WM_PAINT: {
-					printf("WM_PAINT\r\n");
 					return 0;
 				}
 				case WM_KEYDOWN: {
-					printf("WM_KEYDOWN\r\n");
 					return 0;
 				}
 				case WM_ERASEBKGND: {
-					printf("WM_ERASEBKGND\r\n");
-					SendMessage(hWnd, WM_PAINT, NULL, NULL);
+					SendMessageA(hWnd, WM_PAINT, NULL, NULL);
 					return TRUE;
 				}
 			}
@@ -84,28 +112,32 @@ namespace ando {
 			return DefWindowProcA(hWnd, message, wParam, lParam);
 		}
 
-		bool Overlay::waitForWindow(std::string targetWindowName) {
-			while (this->getTarget().getHwnd() == NULL) {
-				this->getTarget().setHwnd(FindWindow(NULL, targetWindowName.c_str()));
+		bool Overlay::waitForWindow(::std::string targetWindowName) {
+			this->logger->log(ELogLevel::LOG_INFO, "{Overlay::waitForWindow} Waiting for window \"%s\"...", targetWindowName.c_str());
 
-				std::this_thread::sleep_for(std::chrono::seconds(2));
+			while (this->getTarget()->getHwnd() == NULL) {
+				this->getTarget()->setHwnd(FindWindowA(NULL, targetWindowName.c_str()));
+
+				std::this_thread::sleep_for(::std::chrono::seconds(2));
 			}
 
-			this->getTarget().setWindowTitle(targetWindowName);
+			this->logger->log(ELogLevel::LOG_INFO, "{Overlay::waitForWindow} Found window! (HWND: 0x%.8X)", this->getTarget()->getHwnd());
+
+			this->getTarget()->setWindowTitle(targetWindowName);
 			this->alignToTarget();
 
 			return true;
 		}
 		bool Overlay::createWindow() {
-			printf("Creating window class...\r\n");
-			WNDCLASSEX wcex;
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::createWindow} Creating window class...");
 
+			WNDCLASSEX wcex;
 			wcex.cbSize = sizeof(WNDCLASSEX);
 			wcex.style = CS_HREDRAW | CS_VREDRAW;
 			wcex.lpfnWndProc = &ando::overlay::Overlay::WindowProcessor;
 			wcex.cbClsExtra = 0;
 			wcex.cbWndExtra = sizeof(ando::overlay::Overlay *);
-			wcex.hInstance = (HINSTANCE)GetWindowLong(this->getLocal().getHwnd(), GWL_HINSTANCE);
+			wcex.hInstance = (HINSTANCE)GetWindowLongPtrA(this->getLocal()->getHwnd(), GWLP_HINSTANCE);
 			wcex.hCursor = LoadCursor(0, IDC_ARROW);
 			wcex.hIcon = LoadIcon(0, IDI_APPLICATION);
 			wcex.hIconSm = LoadIcon(0, IDI_APPLICATION);
@@ -113,83 +145,139 @@ namespace ando {
 			wcex.lpszMenuName = "ando::Overlay";
 			wcex.lpszClassName = "ando::Overlay";
 
-			printf("Registering window...\r\n");
-			if (!RegisterClassEx(&wcex))
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::createWindow} Registering window...");
+			if (!RegisterClassExA(&wcex)) {
+				this->logger->log(ELogLevel::LOG_ERROR, "{Overlay::createWindow} Failed to register window!");
 				return false;
+			}
 
-			this->getLocal().setWindowTitle(wcex.lpszMenuName);
+			this->getLocal()->setWindowTitle(wcex.lpszMenuName);
 
-			printf("Creating Window...\r\n");
-			HWND mainHandle = CreateWindowEx(
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::createWindow} Creating window...");
+			HWND mainHandle = CreateWindowExA(
 				WS_EX_TOPMOST | WS_EX_COMPOSITED | WS_EX_TRANSPARENT | WS_EX_LAYERED,
 				wcex.lpszMenuName, wcex.lpszClassName,
 				WS_POPUP,
 				CW_USEDEFAULT, CW_USEDEFAULT,
-				this->getTarget().getWidth(),
-				this->getTarget().getHeight(),
+				this->getTarget()->getWidth(),
+				this->getTarget()->getHeight(),
 				0, 0, 0,
 				static_cast<LPVOID>(this));
-			if (!mainHandle)
-				return false;
 
-			this->getLocal().setHwnd(mainHandle);
-			this->getLocal().setX(this->getTarget().getX());
-			this->getLocal().setY(this->getTarget().getY());
-			this->getLocal().setWidth(this->getTarget().getWidth());
-			this->getLocal().setHeight(this->getTarget().getHeight());
+			if (!mainHandle) {
+				this->logger->log(ELogLevel::LOG_ERROR, "{Overlay::createWindow} Failed to create window!");
+				return false;
+			}
+
+			this->mainThreadId = GetCurrentThreadId();
+
+			this->getLocal()->setHwnd(mainHandle);
+			this->getLocal()->setX(this->getTarget()->getX());
+			this->getLocal()->setY(this->getTarget()->getY());
+			this->getLocal()->setWidth(this->getTarget()->getWidth());
+			this->getLocal()->setHeight(this->getTarget()->getHeight());
 
 			ShowWindow(mainHandle, SW_SHOWDEFAULT);
 
-			if (!UpdateWindow(mainHandle))
+			if (!UpdateWindow(mainHandle)) {
+				this->logger->log(ELogLevel::LOG_ERROR, "{Overlay::createWindow} Failed to update window!");
 				return false;
+			}
 
-			if (!MoveWindow(mainHandle, this->getLocal().getX(), this->getLocal().getY(), this->getLocal().getWidth(), this->getLocal().getHeight(), TRUE))
+			if (!MoveWindow(mainHandle, this->getLocal()->getX(), this->getLocal()->getY(), this->getLocal()->getWidth(), this->getLocal()->getHeight(), TRUE)) {
+				this->logger->log(ELogLevel::LOG_ERROR, "{Overlay::createWindow} Failed to move window!");
 				return false;
+			}
 
-			SetForegroundWindow(this->getTarget().getHwnd());
+			SetForegroundWindow(this->getTarget()->getHwnd());
 
 			return true;
 		}
 
 		void Overlay::destroyWindow() {
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::destroyWindow} Destroying window...");
+
 			this->running = false;
 
-			if(this->getLocal().getHwnd())
-				DestroyWindow(this->getLocal().getHwnd());
+			if(this->getLocal()->getHwnd())
+				DestroyWindow(this->getLocal()->getHwnd());
 		}
 		void Overlay::alignToTarget() {
-			printf("Aligning Overlay to Target...\r\n");
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::alignToTarget} Aligning overlay to target...");
+			
+			RECT windowSize;
+			ZeroMemory(&windowSize, sizeof(RECT));
 
-			RECT WindowSize;
-			ZeroMemory(&WindowSize, sizeof(RECT));
-
-			if (!GetWindowRect(this->getTarget().getHwnd(), &WindowSize))
+			if (!GetWindowRect(this->getTarget()->getHwnd(), &windowSize))
 				return;
 
-			DWORD dwLong = GetWindowLong(this->getTarget().getHwnd(), GWL_STYLE);
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::alignToTarget} Found window RECT (%u, %u, %u, %u)", windowSize.left, windowSize.top, windowSize.right, windowSize.bottom);
+
+			DWORD dwLong = GetWindowLongA(this->getTarget()->getHwnd(), GWL_STYLE);
 
 			if (dwLong & WS_BORDER) {
+				this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::alignToTarget} Adjusting for border...");
+
 				int x = GetSystemMetrics(SM_CXBORDER);
 				int y = GetSystemMetrics(SM_CYBORDER) + GetSystemMetrics(SM_CYCAPTION);
 
-				WindowSize.left += x;
-				WindowSize.top += y;
-				WindowSize.right -= x;
-				WindowSize.bottom -= GetSystemMetrics(SM_CYBORDER);
+				windowSize.left += x;
+				windowSize.top += y;
+				windowSize.right -= x;
+				windowSize.bottom -= GetSystemMetrics(SM_CYBORDER);
 			}
 
-			this->getTarget().setX(WindowSize.left);
-			this->getTarget().setY(WindowSize.top);
-			this->getTarget().setWidth(WindowSize.right - WindowSize.left);
-			this->getTarget().setHeight(WindowSize.bottom - WindowSize.top);
+			this->getTarget()->setX(windowSize.left);
+			this->getTarget()->setY(windowSize.top);
+			this->getTarget()->setWidth(windowSize.right - windowSize.left);
+			this->getTarget()->setHeight(windowSize.bottom - windowSize.top);
 
-			this->getLocal().setX(this->getTarget().getX());
-			this->getLocal().setY(this->getTarget().getY());
-			this->getLocal().setWidth(this->getTarget().getWidth());
-			this->getLocal().setHeight(this->getTarget().getHeight());
+			bool windowChanged = false;
 
-			if (this->localInstance.getHwnd())
-				MoveWindow(this->getLocal().getHwnd(), this->getLocal().getX(), this->getLocal().getY(), this->getLocal().getWidth(), this->getLocal().getHeight(), TRUE);
+			if ((this->getLocal()->getX() != this->getTarget()->getX()) && (this->getLocal()->getY() != this->getTarget()->getY())) {
+				this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::alignToTarget} Window has moved");
+				windowChanged = true;
+			}
+			if ((this->getLocal()->getWidth() != this->getTarget()->getWidth()) && (this->getLocal()->getHeight() != this->getTarget()->getHeight())) {
+				this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::alignToTarget} Window has resized");
+				windowChanged = true;
+
+				this->onResize();
+			}
+
+			if (!windowChanged)
+				return;
+
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::alignToTarget} Setting Overlay instances (%u, %u, %u, %u)...", windowSize.left, windowSize.top, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top);
+			this->getLocal()->setX(this->getTarget()->getX());
+			this->getLocal()->setY(this->getTarget()->getY());
+			this->getLocal()->setWidth(this->getTarget()->getWidth());
+			this->getLocal()->setHeight(this->getTarget()->getHeight());
+
+			if (!this->localInstance->getHwnd())
+				return;
+
+			WINDOWPOS windowPosition;
+			windowPosition.hwnd = this->getLocal()->getHwnd();
+			windowPosition.hwndInsertAfter = HWND_TOPMOST;
+			windowPosition.x = this->getLocal()->getX();
+			windowPosition.y = this->getLocal()->getY();
+			windowPosition.cx = this->getLocal()->getWidth();
+			windowPosition.cy = this->getLocal()->getHeight();
+
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::alignToTarget} Moving window...");
+			
+			PostThreadMessageA(this->mainThreadId, WM_WINDOWPOSCHANGING, NULL, (LPARAM)&windowPosition);
+			PostThreadMessageA(this->mainThreadId, WM_WINDOWPOSCHANGED, NULL, (LPARAM)&windowPosition);
+			PostThreadMessageA(this->mainThreadId, WM_MOVE, NULL, MAKELPARAM(windowPosition.x, windowPosition.y));
+			PostThreadMessageA(this->mainThreadId, WM_SIZE, SIZE_RESTORED, MAKELPARAM(windowPosition.cx, windowPosition.cy));
+			PostThreadMessageA(this->mainThreadId, WM_NCCALCSIZE, FALSE, (LPARAM)&windowSize);
+
+			// TODO: Move window creation and run logic to single thread
+			//PostThreadMessage(this->mainThreadId, WM_MOVE, )
+			/*if (!MoveWindow(this->getLocal().getHwnd(), this->getLocal().getX(), this->getLocal().getY(), this->getLocal().getWidth(), this->getLocal().getHeight(), TRUE)) {
+				ANDO_SAFE_LOG(ELogLevel::LOG_WARNING, "Failed to move window!");
+			}*/
 		}
 
 		bool Overlay::RunFrame() {
@@ -198,7 +286,7 @@ namespace ando {
 				return false;
 			}
 
-			if (this->getTarget().getHwnd() != GetForegroundWindow())
+			if (this->getTarget()->getHwnd() != GetForegroundWindow())
 				return false;
 
 			if (!this->BeginFrame())
@@ -219,7 +307,7 @@ namespace ando {
 		}
 
 		void Overlay::run() {
-			printf("Running Overlay...\r\n");
+			this->logger->log(ELogLevel::LOG_INFO, "{Overlay::run} Running Overlay...");
 
 			this->running = true;
 
@@ -227,35 +315,42 @@ namespace ando {
 			uint8_t frameCounter = 0;
 
 			while(this->running) {
-				if(PeekMessage(&message, this->getLocal().getHwnd(), 0, 0, PM_REMOVE)) {
+				while(PeekMessageA(&message, this->getLocal()->getHwnd(), 0, 0, PM_REMOVE)) {
 					TranslateMessage(&message);
-					DispatchMessage(&message);
+					DispatchMessageA(&message);
 				}
-				else {
-					if (frameCounter++ >= 254) {
-						frameCounter = 0;
 
-						if (!FindWindowA(NULL, this->getTarget().getWindowTitle().c_str())) {
-							printf("Window closed!\r\n");
-							this->running = false;
-							break;
-						}
+				if (frameCounter++ >= 254) {
+					frameCounter = 0;
+
+					// Have to move all the window logic to it's own thread to be able to move the window from this thread
+					//this->alignToTarget();
+
+					if (!FindWindowA(NULL, this->getTarget()->getWindowTitle().c_str())) {
+						this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::run} Window closed!");
+						this->running = false;
+						break;
 					}
-
-					this->RunFrame();
 				}
 
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				this->RunFrame();
+
+				std::this_thread::sleep_for(::std::chrono::milliseconds(1));
 			}
 
 			this->destroyWindow();
-			printf("Destroyed window!\r\n");
+			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::run} Destroyed window!");
 		}
 
-		ando::overlay::OverlayInstance &Overlay::getTarget() {
+		// TODO: *See TODO at the end of ::ando::overlay::Overlay::alignToTarget()*
+		void Overlay::runWindow() {
+
+		}
+
+		std::shared_ptr<ando::overlay::OverlayInstance> Overlay::getTarget() {
 			return this->targetInstance;
 		}
-		ando::overlay::OverlayInstance &Overlay::getLocal() {
+		std::shared_ptr<ando::overlay::OverlayInstance> Overlay::getLocal() {
 			return this->localInstance;
 		}
 

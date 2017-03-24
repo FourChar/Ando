@@ -6,14 +6,14 @@ namespace ando {
 			this->hWnd = NULL;
 		}
 
-		void OverlayInstance::setWindowTitle(std::string windowTitle) {
+		void OverlayInstance::setWindowTitle(::std::string windowTitle) {
 			this->windowTitle = windowTitle;
 		}
 		void OverlayInstance::setHwnd(HWND hWnd) {
 			this->hWnd = hWnd;
 		}
 
-		std::string OverlayInstance::getWindowTitle() const {
+		::std::string OverlayInstance::getWindowTitle() const {
 			return this->windowTitle;
 		}
 		HWND OverlayInstance::getHwnd() const {

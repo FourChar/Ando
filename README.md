@@ -96,3 +96,81 @@ The drawing methods you should be concerned with reside in `ando::overlay::surfa
 | DrawOutlinedRectangle | `float x`, `float y`, `float width`, `float height`, `ando::Color color`, `ando::Color outlineColor = ando::colors::black` |
 | FillRectangle         | `float x`, `float y`, `float width`, `float height`, `ando::Color color` |
 | FillOutlinedRectangle | `float x`, `float y`, `float width`, `float height`, `ando::Color color`, `ando::Color outlineColor = ando::colors::black` |
+
+## Game Process Instance
+
+### Defining the Instance
+
+Create a seperate class for each process (game in this case):
+{Inheriting the IBaseGameInstance class}
+```C++
+class CGlobalOffensiveInstance : public IBaseGameInstance<CGlobalOffensiveShared /*static shared data*/, CGlobalOffensiveBaseEntity> {
+public:
+	virtual ~CGlobalOffensiveInstance();
+	
+public:
+	virtual bool worldToScreen(::ando::math::Vector3<float> from, ::ando::math::Vector2<float> &to) override;
+
+protected:
+	virtual void initialize() override;
+	
+	virtual void processUpdate() override;
+}
+```
+
+Then create a custom base entity (probably the player's class):
+{Inheriting the IBaseAndoEntity class}
+```C++
+class CGlobalOffensiveInstance;
+
+class CGlobalOffensiveBaseEntity : public IBaseAndoEntity {
+	friend CGlobalOffensiveInstance;
+	
+private:
+	__int32 m_iHealth;
+	__int32 m_iTeamNum;
+	__int32 m_ArmorValue;
+	
+	::ando::math::Vector3<float> m_vecOrigin;
+	
+	bool m_bIsDefusing;
+	
+public:
+	CGlobalOffensiveBaseEntity &operator(const CGlobalOffensiveBaseEntity &rhs) {
+		this->m_iHealth = rhs.m_iHealth;
+		this->m_iTeamNum = rhs.m_iTeamNum;
+		this->m_ArmorValue = rhs.m_ArmorValue;
+		
+		this->m_vecOrigin = rhs.m_vecOrigin;
+		
+		this->m_bIsDefusing = rhs.m_bIsDefusing;
+	}
+	
+	/*etc...*/
+};
+```
+
+The Shared class is a simple means of sharing data between all the various functions:
+```C++
+class CGlobalOffensiveShared : public IBaseGameShared {
+private:
+	::ando::math::Matrix<float, 4, 4> viewMatrix;
+	
+public:
+	CGlobalOffensiveShared();
+	
+public:
+	::ando::math::Matrix<float, 4, 4> &getViewMatrix();
+}
+```
+
+### Creating the Instance
+
+You could either instantiate a new instance of that `CGlobalOffensiveInstance` class with the correct parameters or the overlay provides a convenient wrapper:
+```C++
+auto gameInstance = overlay->makeProcessInstance<ando::process_specific::CounterStrike::CGlobalOffensiveInstance>();
+
+gameInstance->setShouldRunUpdater(true);
+
+gameInstance->getShared()->getViewMatrix(); /*etc...*/
+```

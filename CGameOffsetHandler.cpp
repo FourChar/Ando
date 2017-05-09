@@ -10,7 +10,7 @@ namespace ando {
 		}
 		CGameOffsetHandler::~CGameOffsetHandler() { }
 
-		bool CGameOffsetHandler::addOffset(::std::string name, ::std::uint64_t offset) {
+		bool CGameOffsetHandler::addOffset(::std::string name, ::std::uintptr_t offset) {
 			auto it = this->offsetMap.find(name);
 			if (it != this->offsetMap.end())
 				return false;
@@ -21,7 +21,7 @@ namespace ando {
 			return true;
 		}
 
-		::std::uint64_t CGameOffsetHandler::getOffsetByName(::std::string name) {
+		::std::uintptr_t CGameOffsetHandler::getOffsetByName(::std::string name) {
 			auto it = this->offsetMap.find(name);
 			if (it == this->offsetMap.end())
 				return 0;
@@ -29,11 +29,11 @@ namespace ando {
 			return it->second;
 		}
 
-		::std::uint64_t CGameOffsetHandler::getRelativeAddress(::std::uint64_t baseAddress, ::std::string name) {
+		::std::uintptr_t CGameOffsetHandler::getRelativeAddress(::std::uintptr_t baseAddress, ::std::string name) {
 			return (baseAddress + this->getOffsetByName(name));
 		}
 
-		::std::uint64_t CGameOffsetHandler::getRelativeAddress(::std::string baseAddressName, ::std::string name) {
+		::std::uintptr_t CGameOffsetHandler::getRelativeAddress(::std::string baseAddressName, ::std::string name) {
 			return (this->getOffsetByName(baseAddressName) + this->getOffsetByName(name));
 		}
 	}

@@ -173,7 +173,7 @@ namespace ando {
 				this->renderTarget->DrawLine(::D2D1::Point2F(x1, y1), ::D2D1::Point2F(x2, y2), this->toD2DColor(color), 0.5f);
 			}
 			void D2DOverlay::DrawRectangle(float x, float y, float width, float height, ando::Color color) {
-				D2D1_RECT_F rect = ::D2D1::RectF(x, y, x + width, y + height);
+				D2D1_RECT_F rect = ::D2D1::RectF(x, y, x + height, y + width);
 
 				D2D1_ANTIALIAS_MODE oldMode = this->renderTarget->GetAntialiasMode();
 				this->renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
@@ -181,7 +181,7 @@ namespace ando {
 				this->renderTarget->SetAntialiasMode(oldMode);
 			}
 			void D2DOverlay::FillRectangle(float x, float y, float width, float height, ando::Color color) {
-				D2D1_RECT_F rect = ::D2D1::RectF(x - 1, y - 1, x + width, y + height);
+				D2D1_RECT_F rect = ::D2D1::RectF(x - 1, y - 1, x + height, y + width);
 
 				D2D1_ANTIALIAS_MODE oldMode = this->renderTarget->GetAntialiasMode();
 				this->renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);

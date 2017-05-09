@@ -14,7 +14,7 @@
 
 #include "OverlayInstance.hpp"
 
-#include "IProcessHandler.hpp"
+#include "CProcessHandler.hpp"
 
 namespace ando {
 	namespace process_specific {
@@ -27,12 +27,12 @@ namespace ando {
 			::std::vector<::std::shared_ptr<EntityClass>> entityList;
 
 		public: // Constructors & Destructors
-			IBaseGameInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::IProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance)
+			IBaseGameInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::CProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance)
 				: IBaseProcessInstance(logger, processHandler) {
 				this->targetInstance = targetInstance;
 				this->offsetHandler = ::std::make_shared<::ando::process_specific::CGameOffsetHandler>(logger);
 			}
-			IBaseGameInstance(::std::shared_ptr<::ando::memory::IProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance)
+			IBaseGameInstance(::std::shared_ptr<::ando::memory::CProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance)
 				: IBaseProcessInstance(processHandler) {
 				this->targetInstance = targetInstance;
 				this->offsetHandler = ::std::make_shared<::ando::process_specific::CGameOffsetHandler>();

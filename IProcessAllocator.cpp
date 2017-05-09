@@ -28,20 +28,20 @@ namespace ando {
 			SIZE_T numberOfBytes = 0;
 
 			if (WriteProcessMemory(this->process->getHandle(), address, data, size, &numberOfBytes) == 0) {
-				this->free(address, size);
+				this->free(address);
 
 				return nullptr;
 			}
 
 			return address;
 		}
-		bool IProcessAllocator::free(MEM_PTR pointer, ::std::size_t size) {
+		bool IProcessAllocator::free(MEM_PTR pointer) {
 			std::lock_guard<std::mutex> lock(this->_mutex);
 
 			if ((this->process == nullptr) || (this->process->getHandle() == INVALID_HANDLE_VALUE))
 				return false;
 
-			return VirtualFreeEx(this->process->getHandle(), pointer, size, MEM_RELEASE) == 1;
+			return VirtualFreeEx(this->process->getHandle(), pointer, NULL, MEM_RELEASE) == 1;
 		}
 	}
 }

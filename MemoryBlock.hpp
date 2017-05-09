@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "IProcessHandler.hpp"
+#include "CProcessHandler.hpp"
 
 namespace ando {
 	namespace memory {
@@ -15,14 +15,14 @@ namespace ando {
 		private:
 			std::mutex _mutex;
 
-			std::shared_ptr<IProcessHandler> processHandler;
-			std::uint64_t baseAddress;
-			std::uint64_t size;
-			std::uint64_t offset;
+			std::shared_ptr<CProcessHandler> processHandler;
+			std::uintptr_t baseAddress;
+			std::uintptr_t size;
+			std::uintptr_t offset;
 			char *data;
 
 		public:
-			MemoryBlock(::std::shared_ptr<IProcessHandler> processHandler, ::std::uint64_t baseAddress, ::std::uint64_t size, ::std::uint64_t offset = 0) {
+			MemoryBlock(::std::shared_ptr<CProcessHandler> processHandler, ::std::uintptr_t baseAddress, ::std::uintptr_t size, ::std::uintptr_t offset = 0) {
 				if ((baseAddress == 0) || (size == 0))
 					return;
 
@@ -38,7 +38,7 @@ namespace ando {
 			}
 
 		private:
-			bool readSection(::std::uint64_t baseAddress, ::std::uint64_t size) {
+			bool readSection(::std::uintptr_t baseAddress, ::std::uintptr_t size) {
 				return this->processHandler->getReader()->read(baseAddress, this->getData(), (::std::size_t)size);
 			}
 
@@ -55,7 +55,7 @@ namespace ando {
 			}
 
 			template <typename T>
-			bool getAt(::std::uint64_t offset, T *dataPtr, ::std::uint64_t copySize = sizeof(T)) {
+			bool getAt(::std::uintptr_t offset, T *dataPtr, ::std::uintptr_t copySize = sizeof(T)) {
 				std::lock_guard<std::mutex> lock(this->_mutex);
 
 				if (dataPtr == nullptr)
@@ -75,20 +75,20 @@ namespace ando {
 			}
 
 		public:
-			std::uint64_t getBaseAddress() const {
+			std::uintptr_t getBaseAddress() const {
 				return this->baseAddress;
 			}
-			std::uint64_t getSize() const {
+			std::uintptr_t getSize() const {
 				return this->size;
 			}
-			std::uint64_t getOffset() const {
+			std::uintptr_t getOffset() const {
 				return this->offset;
 			}
 			const char *getData() const {
 				return this->data;
 			}
-			const char *getDataAt(::std::uint64_t offset) const {
-				return (const char *)(((::std::uint64_t)this->getData()) + offset);
+			const char *getDataAt(::std::uintptr_t offset) const {
+				return (const char *)(((::std::uintptr_t)this->getData()) + offset);
 			}
 		};
 	}

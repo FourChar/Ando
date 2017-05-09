@@ -3,14 +3,14 @@
 namespace ando {
 	namespace process_specific {
 		// Constructors & Destructors
-		IBaseProcessInstance::IBaseProcessInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::IProcessHandler> processHandler) {
+		IBaseProcessInstance::IBaseProcessInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::CProcessHandler> processHandler) {
 			this->logger = ::std::make_shared<::ando::logger::ISafeLogger>(logger);
 			this->processHandler = processHandler;
 			this->updatesStarted = false;
 			this->runUpdater = false;
 			this->updateThread = ::std::make_unique<::std::thread>(::std::bind(&IBaseProcessInstance::safeProcessUpdate, this));
 		}
-		IBaseProcessInstance::IBaseProcessInstance(::std::shared_ptr<::ando::memory::IProcessHandler> processHandler) {
+		IBaseProcessInstance::IBaseProcessInstance(::std::shared_ptr<::ando::memory::CProcessHandler> processHandler) {
 			this->logger = ::std::make_shared<::ando::logger::ISafeLogger>();
 			this->processHandler = processHandler;
 			this->updatesStarted = false;
@@ -74,7 +74,7 @@ namespace ando {
 			this->logger->setLogger(logger);
 			this->getMutex().unlock();
 		}
-		void IBaseProcessInstance::setProcessHandler(::std::shared_ptr<::ando::memory::IProcessHandler> processHandler) {
+		void IBaseProcessInstance::setProcessHandler(::std::shared_ptr<::ando::memory::CProcessHandler> processHandler) {
 			this->getMutex().lock();
 			this->processHandler = processHandler;
 			this->getMutex().unlock();
@@ -88,7 +88,7 @@ namespace ando {
 		::std::shared_ptr<::ando::logger::ISafeLogger> &IBaseProcessInstance::getLogger() {
 			return this->logger;
 		}
-		::std::shared_ptr<::ando::memory::IProcessHandler> &IBaseProcessInstance::getProcessHandler() {
+		::std::shared_ptr<::ando::memory::CProcessHandler> &IBaseProcessInstance::getProcessHandler() {
 			return this->processHandler;
 		}
 

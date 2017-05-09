@@ -5,13 +5,16 @@
 #pragma once
 #endif
 
-#include <windows.h>
+#define ANDO_OVERLAY_VERSION				"1.9.8.5"
+
+#include <Windows.h>
 
 #include "ISurfaceQueuedRenderer.hpp"
 #include "ISurfaceFontRenderer.hpp"
 #include "ISurfaceFont.hpp"
 #include "OverlayRenderer.hpp"
 #include "OverlayInstance.hpp"
+#include "CProcessHandler.hpp"
 #include "IBasicLogger.hpp"
 #include "ILogger.hpp"
 #include "ISafeLogger.hpp"
@@ -27,10 +30,15 @@ namespace ando {
 
 			~Overlay();
 
+		public:
+			static __inline ::std::string getVersion() {
+				return ANDO_OVERLAY_VERSION;
+			}
+
 			bool bindToWindow(::std::string targetWindowName);
 
 			std::shared_ptr<std::thread> runThreaded();
-			void render(::std::function<void(::std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f);
+			void render(::std::function<void(ando::overlay::surface::ISurfaceQueuedRenderer &renderer)> f);
 
 		protected:
 			virtual LRESULT CALLBACK windowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -69,8 +77,17 @@ namespace ando {
 			}
 
 		public:
-			std::shared_ptr<ando::overlay::OverlayInstance> getTarget();
-			std::shared_ptr<ando::overlay::OverlayInstance> getLocal();
+			::std::shared_ptr<ando::overlay::OverlayInstance> getTarget();
+			::std::shared_ptr<ando::overlay::OverlayInstance> getLocal();
+
+		public:
+			::std::shared_ptr<::ando::memory::CProcessHandler> getProcessHandler();
+			::std::shared_ptr<::ando::overlay::surface::ISurfaceQueuedRenderer> getQueuedRenderer();
+
+			template <typename T>
+			::std::shared_ptr<T> makeProcessInstance() {
+				return ::std::make_shared<T>(this->logger->getLogger(), this->getProcessHandler(), this->getTarget());
+			}
 
 		protected:
 			bool isInitialized() const;
@@ -82,8 +99,8 @@ namespace ando {
 			bool canRunExternaly();
 
 		protected:
-			std::shared_ptr<ando::overlay::OverlayInstance> targetInstance;
-			std::shared_ptr<ando::overlay::OverlayInstance> localInstance;
+			::std::shared_ptr<ando::overlay::OverlayInstance> targetInstance;
+			::std::shared_ptr<ando::overlay::OverlayInstance> localInstance;
 			
 		private:
 			bool initialized;
@@ -92,10 +109,10 @@ namespace ando {
 			DWORD mainThreadId;
 
 		protected:
-			std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> queuedRenderer;
-			std::shared_ptr<std::thread> renderThread;
-			std::unique_ptr<std::mutex> renderMutex;
-			std::shared_ptr<ando::logger::ISafeLogger> logger;
+			::std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> queuedRenderer;
+			::std::shared_ptr<::std::thread> renderThread;
+			::std::unique_ptr<::std::mutex> renderMutex;
+			::std::shared_ptr<ando::logger::ISafeLogger> logger;
 		}; // class Overlay
 	} // namespace overlay
 } // namespace ando

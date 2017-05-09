@@ -28,7 +28,7 @@ namespace ando {
 		protected: // Protected Functions
 			bool hasLogger() const;
 
-		protected: // Protected Getters
+		public: // Public Getters
 			::std::shared_ptr<::ando::logger::ILogger> &getLogger();
 
 		public: // Public Setters

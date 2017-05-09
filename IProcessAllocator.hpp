@@ -25,7 +25,7 @@ namespace ando {
 		public:
 			MEM_PTR alloc(::std::size_t size);
 			MEM_PTR commit(MEM_PTR data, ::std::size_t size);
-			bool free(MEM_PTR pointer, ::std::size_t size);
+			bool free(MEM_PTR pointer);
 		};
 	}
 }

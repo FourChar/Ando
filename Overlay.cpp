@@ -52,11 +52,11 @@ namespace ando {
 			return (this->renderThread = ::std::make_shared<std::thread>(::std::bind(&ando::overlay::Overlay::run, this)));
 		}
 
-		void Overlay::render(::std::function<void(::std::shared_ptr<ando::overlay::surface::ISurfaceQueuedRenderer> renderer)> f) {
+		void Overlay::render(::std::function<void(ando::overlay::surface::ISurfaceQueuedRenderer &renderer)> f) {
 			this->logger->log(ELogLevel::LOG_DEBUG, "{Overlay::render} Starting external renderer...");
 
 			while (this->canRunExternaly()) {
-				f(this->queuedRenderer);
+				f(*this->queuedRenderer.get());
 			}
 		}
 
@@ -352,6 +352,22 @@ namespace ando {
 		}
 		std::shared_ptr<ando::overlay::OverlayInstance> Overlay::getLocal() {
 			return this->localInstance;
+		}
+
+		::std::shared_ptr<::ando::memory::CProcessHandler> Overlay::getProcessHandler() {
+			static ::std::shared_ptr<::ando::memory::CProcessHandler> processHandler = nullptr;
+
+			if (this->getTarget()->getHwnd() == NULL)
+				return nullptr;
+
+			if (processHandler == nullptr) {
+				processHandler = ::std::make_shared<::ando::memory::CProcessHandler>(this->getTarget()->getHwnd());
+			}
+
+			return processHandler;
+		}
+		::std::shared_ptr<::ando::overlay::surface::ISurfaceQueuedRenderer> Overlay::getQueuedRenderer() {
+			return this->queuedRenderer;
 		}
 
 		bool Overlay::isInitialized() const {

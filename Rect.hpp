@@ -9,7 +9,7 @@
 
 namespace ando {
 	namespace math {
-		template <typename T>
+		template <typename T = float>
 		class Rect : public Vector4<T> {
 		public: // Constructors
 			Rect() : Vector4() { }

@@ -6,7 +6,7 @@ namespace ando {
 			this->process = process;
 		}
 
-		BYTE IProcessReader::readByte(::std::uint64_t address) {
+		BYTE IProcessReader::readByte(::std::uintptr_t address) {
 			BYTE data = 0;
 
 			if (!this->read<BYTE>(address, &data))
@@ -14,7 +14,7 @@ namespace ando {
 
 			return data;
 		}
-		bool IProcessReader::readBool(::std::uint64_t address) {
+		bool IProcessReader::readBool(::std::uintptr_t address) {
 			bool data = false;
 
 			if (!this->read<bool>(address, &data))
@@ -22,7 +22,7 @@ namespace ando {
 
 			return data;
 		}
-		int IProcessReader::readInt(::std::uint64_t address) {
+		int IProcessReader::readInt(::std::uintptr_t address) {
 			int data = 0;
 
 			if (!this->read(address, &data))
@@ -30,7 +30,7 @@ namespace ando {
 
 			return data;
 		}
-		float IProcessReader::readFloat(::std::uint64_t address) {
+		float IProcessReader::readFloat(::std::uintptr_t address) {
 			float data = 0;
 
 			if (!this->read(address, &data))
@@ -38,7 +38,7 @@ namespace ando {
 
 			return data;
 		}
-		long IProcessReader::readLong(::std::uint64_t address) {
+		long IProcessReader::readLong(::std::uintptr_t address) {
 			long data = 0;
 
 			if (!this->read(address, &data))
@@ -46,7 +46,7 @@ namespace ando {
 
 			return data;
 		}
-		::std::string IProcessReader::readString(::std::uint64_t address) {
+		::std::string IProcessReader::readString(::std::uintptr_t address) {
 			char buffer[256] = { 0 };
 
 			if (!this->read(address, &buffer))

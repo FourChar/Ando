@@ -15,7 +15,7 @@ namespace ando {
 		class CGameOffsetHandler {
 		private: // Variables
 			::std::unique_ptr<::ando::logger::ISafeLogger> logger;
-			::std::unordered_map<::std::string, ::std::uint64_t> offsetMap;
+			::std::unordered_map<::std::string, ::std::uintptr_t> offsetMap;
 
 		public: // Constructors & Destructors
 			CGameOffsetHandler();
@@ -23,10 +23,10 @@ namespace ando {
 			~CGameOffsetHandler();
 
 		public: // Public Functions
-			bool addOffset(::std::string name, ::std::uint64_t offset);
-			::std::uint64_t getOffsetByName(::std::string name);
-			::std::uint64_t getRelativeAddress(::std::uint64_t baseAddress, ::std::string name);
-			::std::uint64_t getRelativeAddress(::std::string baseAddressName, ::std::string name);
+			bool addOffset(::std::string name, ::std::uintptr_t offset);
+			::std::uintptr_t getOffsetByName(::std::string name);
+			::std::uintptr_t getRelativeAddress(::std::uintptr_t baseAddress, ::std::string name);
+			::std::uintptr_t getRelativeAddress(::std::string baseAddressName, ::std::string name);
 		};
 	}
 }

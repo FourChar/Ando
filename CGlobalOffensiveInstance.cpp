@@ -9,12 +9,12 @@ namespace ando {
 	namespace process_specific {
 		namespace CounterStrike {
 			// Constructors & Destructors
-			CGlobalOffensiveInstance::CGlobalOffensiveInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::IProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance)
+			CGlobalOffensiveInstance::CGlobalOffensiveInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::CProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance)
 				: IBaseGameInstance(logger, processHandler, targetInstance) {
 				this->setShared(new CGlobalOffensiveShared());
 				this->initialize();
 			}
-			CGlobalOffensiveInstance::CGlobalOffensiveInstance(::std::shared_ptr<::ando::memory::IProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance)
+			CGlobalOffensiveInstance::CGlobalOffensiveInstance(::std::shared_ptr<::ando::memory::CProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance)
 				: IBaseGameInstance(processHandler, targetInstance) {
 				this->setShared(new CGlobalOffensiveShared());
 				this->initialize();
@@ -75,22 +75,23 @@ namespace ando {
 
 				this->getLogger()->log(::ando::logger::ELogLevel::LOG_DEBUG, "{CGlobalOffensiveInstance::initialize} Adding Offsets!");
 
-				this->getOffsetHandler()->addOffset("GlobalVars", 0x00AA13A0);
-				this->getOffsetHandler()->addOffset("LocalPlayer", 0x00AAD704);
-				this->getOffsetHandler()->addOffset("ViewMatrix", 0x04AC2424);
-				this->getOffsetHandler()->addOffset("PlayerResource", 0x04AF0ADC);
-				this->getOffsetHandler()->addOffset("RadarBase", 0x04F0560C);
-				this->getOffsetHandler()->addOffset("WeaponTable", 0x04F17A1C);
+				this->getOffsetHandler()->addOffset("GlobalVars", 0x00AA63A0);
+				this->getOffsetHandler()->addOffset("LocalPlayer", 0x00AB2704);
+				this->getOffsetHandler()->addOffset("ViewMatrix", 0x04AC77C4);
+				this->getOffsetHandler()->addOffset("PlayerResource", 0x02F13E4C);
+				this->getOffsetHandler()->addOffset("RadarBase", 0x04F0A99C);
+				this->getOffsetHandler()->addOffset("WeaponTable", 0x04F1CD9C);
 
-				this->getOffsetHandler()->addOffset("ClientState", 0x005CB524);
+				this->getOffsetHandler()->addOffset("ClientState", 0x005CC574);
 				this->getOffsetHandler()->addOffset("ClientState:GetState", 0x100);
 				this->getOffsetHandler()->addOffset("ClientState:GetLocalPlayer", 0x178);
 				this->getOffsetHandler()->addOffset("ClientState:GetMapDirectory", 0x180);
 				this->getOffsetHandler()->addOffset("ClientState:GetMap", 0x284);
+				this->getOffsetHandler()->addOffset("ClientState:GetMaxPlayers", 0x308);
 				this->getOffsetHandler()->addOffset("ClientState:GetViewAngles", 0x4D0C);
 				this->getOffsetHandler()->addOffset("ClientState:GetPlayerInfo", 0x523C);
 
-				this->getOffsetHandler()->addOffset("EntityList", 0x04AD0884);
+				this->getOffsetHandler()->addOffset("EntityList", 0x04AD5C24);
 				this->getOffsetHandler()->addOffset("EntityList:MaxUsedServerIndex", 0x24);
 
 				this->getOffsetHandler()->addOffset("PlayerResource:Name", 0x09D8);
@@ -132,32 +133,55 @@ namespace ando {
 			void CGlobalOffensiveInstance::processUpdate() {
 				{ // GlobalVars
 					this->getMutex().lock();
-					auto pointer = this->getProcessHandler()->getReader()->readLong(this->getOffsetHandler()->getRelativeAddress(this->clientModule->getBaseAddress(), "GlobalVars"));
-					this->getProcessHandler()->getReader()->read(pointer, &this->getShared()->getGlobalVars());
+					auto relativeAddress = this->getOffsetHandler()->getRelativeAddress(this->clientModule->getBaseAddress(), "GlobalVars");
+					if (relativeAddress != this->clientModule->getBaseAddress()) {
+						auto pointer = this->getProcessHandler()->getReader()->readLong(relativeAddress);
+						if (pointer != NULL) {
+							this->getProcessHandler()->getReader()->read(pointer, &this->getShared()->getGlobalVars());
+						}
+						else {
+							this->getLogger()->log(ando::logger::ELogLevel::LOG_CRITICAL, "Invalid %s (0x%.8X)!", "GlobalVars", (relativeAddress - this->clientModule->getBaseAddress()));
+						}
+					}
 					this->getMutex().unlock();
 				}
 				{ // LocalPlayer
 					this->getMutex().lock();
-					auto pointer = this->getProcessHandler()->getReader()->readLong(this->getOffsetHandler()->getRelativeAddress(this->clientModule->getBaseAddress(), "LocalPlayer"));
-					this->readEntityFromAddress(pointer, &this->getShared()->getLocalPlayer());
+					auto relativeAddress = this->getOffsetHandler()->getRelativeAddress(this->clientModule->getBaseAddress(), "LocalPlayer");
+					if (relativeAddress != this->clientModule->getBaseAddress()) {
+						auto pointer = this->getProcessHandler()->getReader()->readLong(relativeAddress);
+						if (pointer != NULL) {
+							this->readEntityFromAddress(pointer, &this->getShared()->getLocalPlayer());
+						}
+						else {
+							this->getLogger()->log(ando::logger::ELogLevel::LOG_CRITICAL, "Invalid %s (0x%.8X)!", "LocalPlayer", (relativeAddress - this->clientModule->getBaseAddress()));
+						}
+					}
 					this->getMutex().unlock();
 				}
 				{ // ViewMatrix
 					this->getMutex().lock();
-					this->getProcessHandler()->getReader()->read(this->getOffsetHandler()->getRelativeAddress(this->clientModule->getBaseAddress(), "ViewMatrix"), this->getShared()->getViewMatrix().getData(), 4 * 4 * sizeof(float));
+					auto relativeAddress = this->getOffsetHandler()->getRelativeAddress(this->clientModule->getBaseAddress(), "ViewMatrix");
+					if (relativeAddress != this->clientModule->getBaseAddress()) {
+						this->getProcessHandler()->getReader()->read(relativeAddress, this->getShared()->getViewMatrix().getData(), 4 * 4 * sizeof(float));
+					}
+					else {
+						this->getLogger()->log(ando::logger::ELogLevel::LOG_CRITICAL, "Invalid %s (0x%.8X)!", "ViewMatrix", (relativeAddress - this->clientModule->getBaseAddress()));
+					}
 					this->getMutex().unlock();
 				}
 
 				{ // EntityList
 					::std::vector<::std::shared_ptr<::ando::process_specific::CounterStrike::CGlobalOffensiveBaseEntity>> entityList;
 
-					for (::std::size_t i = 1; i < this->getShared()->getGlobalVars().getMaxClients(); i++) {
+					auto maxClients = this->getShared()->getGlobalVars().getMaxClients();
+					for (::std::size_t i = 1; i < maxClients; i++) {
 						auto entity = this->readEntityFromIndex(i);
 						if (entity == nullptr)
 							continue;
 						if (entity->isDormant())
 							continue;
-						if (((entity->getTeam() != 2) && (entity->getTeam() != 3)) || (i > 64)) {
+						if (((entity->getTeam() != 2) && (entity->getTeam() != 3)) || (i > maxClients)) {
 							entityList.emplace_back(entity);
 							continue;
 						}
@@ -189,7 +213,7 @@ namespace ando {
 				return entity;
 			}
 			
-			bool CGlobalOffensiveInstance::readEntityFromAddress(::std::uint64_t baseAddress, ::ando::process_specific::CounterStrike::CGlobalOffensiveBaseEntity *entity) {
+			bool CGlobalOffensiveInstance::readEntityFromAddress(::std::uintptr_t baseAddress, ::ando::process_specific::CounterStrike::CGlobalOffensiveBaseEntity *entity) {
 				// ClassId
 				{
 					auto IClientNetworkable = this->getProcessHandler()->getReader()->readLong(baseAddress + 0x8);

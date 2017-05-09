@@ -16,7 +16,7 @@
 #include "IBaseAndoEntity.hpp"
 
 #include "ISafeLogger.hpp"
-#include "IProcessHandler.hpp"
+#include "CProcessHandler.hpp"
 
 namespace ando {
 	namespace process_specific {
@@ -28,11 +28,11 @@ namespace ando {
 			::std::unique_ptr<::std::thread> updateThread;
 
 			::std::shared_ptr<::ando::logger::ISafeLogger> logger;
-			::std::shared_ptr<::ando::memory::IProcessHandler> processHandler;
+			::std::shared_ptr<::ando::memory::CProcessHandler> processHandler;
 
 		public: // Constructors & Destructors
-			IBaseProcessInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::IProcessHandler> processHandler);
-			IBaseProcessInstance(::std::shared_ptr<::ando::memory::IProcessHandler> processHandler);
+			IBaseProcessInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::CProcessHandler> processHandler);
+			IBaseProcessInstance(::std::shared_ptr<::ando::memory::CProcessHandler> processHandler);
 			IBaseProcessInstance();
 
 			virtual ~IBaseProcessInstance();
@@ -49,13 +49,13 @@ namespace ando {
 			void setShouldRunUpdater(const bool runUpdater);
 
 			void setLogger(::std::shared_ptr<::ando::logger::ILogger> logger);
-			void setProcessHandler(::std::shared_ptr<::ando::memory::IProcessHandler> processHandler);
+			void setProcessHandler(::std::shared_ptr<::ando::memory::CProcessHandler> processHandler);
 
 		protected: // Protected Getters
 			::std::mutex &getMutex();
 
 			::std::shared_ptr<::ando::logger::ISafeLogger> &getLogger();
-			::std::shared_ptr<::ando::memory::IProcessHandler> &getProcessHandler();
+			::std::shared_ptr<::ando::memory::CProcessHandler> &getProcessHandler();
 
 			bool hasProcessHandler();
 

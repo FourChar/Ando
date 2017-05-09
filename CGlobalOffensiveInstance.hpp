@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 
-#include "IProcessHandler.hpp"
+#include "CProcessHandler.hpp"
 
 #include "IBaseGameInstance.hpp"
 
@@ -26,24 +26,24 @@ namespace ando {
 				::ando::memory::IModule *engineModule;
 
 			public: // Constructors & Destructors
-				CGlobalOffensiveInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::IProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance);
-				CGlobalOffensiveInstance(::std::shared_ptr<::ando::memory::IProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance);
+				CGlobalOffensiveInstance(::std::shared_ptr<::ando::logger::ILogger> logger, ::std::shared_ptr<::ando::memory::CProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance);
+				CGlobalOffensiveInstance(::std::shared_ptr<::ando::memory::CProcessHandler> processHandler, ::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance);
 				CGlobalOffensiveInstance(::std::shared_ptr<::ando::overlay::OverlayInstance> targetInstance);
 				CGlobalOffensiveInstance();
 
 				virtual ~CGlobalOffensiveInstance();
 
 			public: // Public Functions
-				virtual bool worldToScreen(::ando::math::Vector3<float> from, ::ando::math::Vector2<float> &to);
+				virtual bool worldToScreen(::ando::math::Vector3<float> from, ::ando::math::Vector2<float> &to) override;
 
 			protected: // Protected Functions
-				virtual void initialize();
+				virtual void initialize() override;
 
-				virtual void processUpdate();
+				virtual void processUpdate() override;
 
 			private: // Private Functions
 				::std::shared_ptr<::ando::process_specific::CounterStrike::CGlobalOffensiveBaseEntity> readEntityFromIndex(::std::size_t index);
-				bool readEntityFromAddress(::std::uint64_t baseAddress, ::ando::process_specific::CounterStrike::CGlobalOffensiveBaseEntity *entity);
+				bool readEntityFromAddress(::std::uintptr_t baseAddress, ::ando::process_specific::CounterStrike::CGlobalOffensiveBaseEntity *entity);
 			};
 		}
 	}

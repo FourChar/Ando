@@ -29,15 +29,15 @@ namespace ando {
 			IProcessReader(IProcess * process);
 
 		public:
-			BYTE readByte(::std::uint64_t address);
-			bool readBool(::std::uint64_t address);
-			int readInt(::std::uint64_t address);
-			float readFloat(::std::uint64_t address);
-			long readLong(::std::uint64_t address);
-			::std::string readString(::std::uint64_t address);
+			BYTE readByte(::std::uintptr_t address);
+			bool readBool(::std::uintptr_t address);
+			int readInt(::std::uintptr_t address);
+			float readFloat(::std::uintptr_t address);
+			long readLong(::std::uintptr_t address);
+			::std::string readString(::std::uintptr_t address);
 
 			template <typename T>
-			math::Vector2<T> readVector2(::std::uint64_t address) {
+			math::Vector2<T> readVector2(::std::uintptr_t address) {
 				static math::Vector2<T> vector;
 
 				if (!this->read(address, vector.getXData(), 2 * sizeof(T)))
@@ -47,7 +47,7 @@ namespace ando {
 			}
 
 			template <typename T>
-			math::Vector3<T> readVector3(::std::uint64_t address) {
+			math::Vector3<T> readVector3(::std::uintptr_t address) {
 				static math::Vector3<T> vector;
 
 				if (!this->read(address, vector.getXData(), 3 * sizeof(T)))
@@ -57,7 +57,7 @@ namespace ando {
 			}
 
 			template <typename T>
-			math::Vector4<T> readVector4(::std::uint64_t address) {
+			math::Vector4<T> readVector4(::std::uintptr_t address) {
 				static math::Vector4<T> vector;
 
 				if (!this->read(address, vector.getXData(), (4 + 1) * sizeof(T)))
@@ -67,7 +67,7 @@ namespace ando {
 			}
 
 			template <typename T, ::std::size_t width, ::std::size_t height>
-			math::Matrix<T, width, height> readMatrix(::std::uint64_t address) {
+			math::Matrix<T, width, height> readMatrix(::std::uintptr_t address) {
 				static math::Matrix<T, width, height> matrix;
 
 				if (!this->read(address, &matrix, width * height * sizeof(T)))
@@ -77,14 +77,14 @@ namespace ando {
 			}
 
 			template <typename T>
-			bool read(::std::uint64_t address, T *data, ::std::size_t size = sizeof(T)) {
+			bool read(::std::uintptr_t address, T *data, ::std::size_t size = sizeof(T), ::std::size_t *bytesRead = nullptr) {
 				std::lock_guard<std::mutex> lock(this->_mutex);
 
 				if ((this->process == nullptr) || (this->process->getHandle() == (MEM_PTR)-1))
 					return false;
 
 				::std::size_t numberOfBytes = 0;
-				if (ReadProcessMemory(this->process->getHandle(), (LPCVOID)address, (LPVOID)data, (SIZE_T)size, reinterpret_cast<SIZE_T *>(&numberOfBytes)) == 0)
+				if (ReadProcessMemory(this->process->getHandle(), (LPCVOID)address, (LPVOID)data, (SIZE_T)size, reinterpret_cast<SIZE_T *>((bytesRead == nullptr) ? &numberOfBytes : bytesRead)) == 0)
 					return false;
 
 				return (numberOfBytes == size);

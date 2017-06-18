@@ -57,6 +57,13 @@ namespace ando {
 					}
 				}
 
+				void ISurfaceQueue::clear() {
+					std::lock_guard<std::mutex> guard(this->_mutex);
+
+					while (!this->queue.empty())
+						this->queue.pop();
+				}
+
 				bool ISurfaceQueue::isQueueEmpty() {
 					return this->queue.empty();
 				}

@@ -58,6 +58,7 @@ namespace ando {
 		public: // Public Functions
 			void walkEntityList(::std::function<bool(::std::size_t index, SharedClass&, EntityClass&)> walkFunction) {
 				if (this->isEntityListEmpty()) {
+					this->getLogger()->log(ando::logger::ELogLevel::LOG_WARNING, "Entity List is empty!");
 					return;
 				}
 

@@ -82,6 +82,11 @@ namespace ando {
 				});
 			}
 			
+			printf("Modules:\n");
+			
+			for (auto it = this->getModules().begin(); it != this->getModules().end(); it++)
+				printf("\t%s\n", it->first.c_str());
+
 			if (this->getModules().empty())
 				return true;
 
@@ -95,6 +100,7 @@ namespace ando {
 				if ((it == this->getModules().end()) || (it->second == nullptr))
 					return false;
 
+				printf("Found Module: %s (%s)\n", entry->szExePath, entry->szModule);
 				it->second->setFileName(entry->szExePath);
 				it->second->setModuleName(entry->szModule);
 				it->second->setBaseAddress((::std::ptrdiff_t)entry->hModule);

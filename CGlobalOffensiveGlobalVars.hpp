@@ -8,34 +8,36 @@
 namespace ando {
 	namespace process_specific {
 		namespace CounterStrike {
-			class CGlobalOffensiveInstance;
+			namespace GlobalOffensive {
+				class CInstance;
 
-			class CGlobalOffensiveGlobalVars {
-				friend CGlobalOffensiveInstance;
+				class CGlobalVars {
+					friend CInstance;
 
-			private:
-				float realTime;
-				__int32 frameCount;
-				float absoluteFrameCount;
-				__int32 _unknown;
-				float currentTime;
-				float frameTime;
-				unsigned __int32 maxClients;
-				__int32 tickCount;
-				float intervalPerTick;
-				float interpolationAmount;
+				private:
+					float realTime;
+					__int32 frameCount;
+					float absoluteFrameTime;
+					__int32 _unknown;
+					float currentTime;
+					float frameTime;
+					unsigned __int32 maxClients;
+					__int32 tickCount;
+					float intervalPerTick;
+					float interpolationAmount;
 
-			public:
-				float getRealTime() { return this->realTime; }
-				__int32 getFrameCount() { return this->frameCount; }
-				float getAbsoluteFrameCount() { return this->absoluteFrameCount; }
-				float getCurrentTime() { return this->currentTime; }
-				float getFrameTime() { return this->frameTime; }
-				unsigned __int32 getMaxClients() { return this->maxClients; }
-				__int32 getTickCount() { return this->tickCount; }
-				float getIntervalPerTick() { return this->intervalPerTick; }
-				float getInterpolationAmount() { return this->interpolationAmount; }
-			};
+				public:
+					float getRealTime() { return this->realTime; }
+					__int32 getFrameCount() { return this->frameCount; }
+					float getAbsoluteFrameTime() { return this->absoluteFrameTime; }
+					float getCurrentTime() { return this->currentTime; }
+					float getFrameTime() { return this->frameTime; }
+					unsigned __int32 getMaxClients() { return this->maxClients; }
+					__int32 getTickCount() { return this->tickCount; }
+					float getIntervalPerTick() { return this->intervalPerTick; }
+					float getInterpolationAmount() { return this->interpolationAmount; }
+				};
+			}
 		}
 	}
 }

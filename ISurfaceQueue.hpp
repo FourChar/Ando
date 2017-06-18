@@ -28,6 +28,7 @@ namespace ando {
 
 				public:
 					void processQueue();
+					void clear();
 
 					bool isQueueEmpty();
 

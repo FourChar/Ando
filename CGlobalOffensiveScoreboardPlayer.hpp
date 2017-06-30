@@ -13,6 +13,23 @@ namespace ando {
 			namespace GlobalOffensive {
 				class CInstance;
 
+				/*class CPlayerResource {
+					friend CInstance;
+
+				private:
+					char m_Unknown00[0x09E0];
+					const char *m_szName[64];
+					char m_Unknown01[0x0AE4 - 0x09E0 - (64 * 0x4)];
+					__int32 m_iPing[64];
+					char m_Unknown02[0x0BE8 - 0x0AE4 - (64 * 0x4)];
+					__int32 m_iKills[64];
+					char m_Unknown03[0x0CEC - 0x0AE4 - (64 * 0x4)];
+					__int32 m_iAssists[64];
+					char m_Unknown04[0x0DF0 - 0x0CEC - (64 * 0x4)];
+					__int32 m_iDeaths[64];
+					char m_Unknown05[0x0EF4 - 0x0DF0 - (64 * sizeof(__int32))];
+				};*/
+
 				class CScoreboardPlayer {
 					friend CInstance;
 

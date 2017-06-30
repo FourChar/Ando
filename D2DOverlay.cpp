@@ -154,11 +154,11 @@ namespace ando {
 
 				if (centered) {
 					actualFont->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-					actualFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+					//actualFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 				}
 				else {
 					actualFont->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
-					actualFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+					//actualFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 				}
 
 				this->renderTarget->DrawTextA(conv.from_bytes(string).c_str(), length, actualFont, rect, (ID2D1Brush*)this->toD2DColor(color));

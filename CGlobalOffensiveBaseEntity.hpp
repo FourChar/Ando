@@ -1,14 +1,16 @@
-#ifndef GO_CBASEPLAYER_HPP
-#define GO_CBASEPLAYER_HPP
+#ifndef CGLOBALOFFENSIVEBASEENTITY_HPP
+#define CGLOBALOFFENSIVEBASEENTITY_HPP
 
 #ifdef _MSC_VER
 #pragma once
 #endif
 
 #include "IBaseAndoEntity.hpp"
+#include "CGlobalOffensiveBoneManager.hpp"
 
 #include "Vector2.hpp"
 #include "Vector3.hpp"
+#include "Matrix.hpp"
 
 namespace ando {
 	namespace process_specific {
@@ -34,6 +36,8 @@ namespace ando {
 					::ando::math::Vector2<float> m_aimPunchAngle;
 					::ando::math::Vector2<float> m_aimPunchAngleVel;
 					::ando::math::Vector2<float> m_viewPunchAngle;
+
+					CBoneManager m_boneManager;
 
 					float m_flFlashMaxAlpha;
 					float m_flFlashDuration;
@@ -65,6 +69,8 @@ namespace ando {
 						this->m_aimPunchAngle = rhs.m_aimPunchAngle;
 						this->m_aimPunchAngleVel = rhs.m_aimPunchAngleVel;
 						this->m_viewPunchAngle = rhs.m_viewPunchAngle;
+
+						this->m_boneManager = rhs.m_boneManager;
 
 						this->m_flFlashMaxAlpha = rhs.m_flFlashMaxAlpha;
 						this->m_flFlashDuration = rhs.m_flFlashDuration;
@@ -98,6 +104,8 @@ namespace ando {
 					::ando::math::Vector2<float> getAimPunchAngleVelocity() { return this->m_aimPunchAngleVel; }
 					::ando::math::Vector2<float> getViewPunchAngle() { return this->m_viewPunchAngle; }
 
+					CBoneManager &getBoneManager() { return this->m_boneManager; }
+
 					float getFlashMaxAlpha() { return this->m_flFlashMaxAlpha; }
 					float getFlashDuration() { return this->m_flFlashDuration; }
 
@@ -117,4 +125,4 @@ namespace ando {
 	}
 }
 
-#endif // GO_CBASEPLAYER_HPP
+#endif // CGLOBALOFFENSIVEBASEENTITY_HPP

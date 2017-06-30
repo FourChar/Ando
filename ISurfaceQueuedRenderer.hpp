@@ -44,6 +44,9 @@ namespace ando {
 				virtual void DrawOutlinedRectangle(float x, float y, float width, float height, ando::Color color, ando::Color outlineColor = ando::colors::black);
 
 				virtual void FillOutlinedRectangle(float x, float y, float width, float height, ando::Color color, ando::Color outlineColor = ando::colors::black);
+
+				virtual void DrawProgressBar(float x, float y, float width, float height, float percentage, ando::Color successColor = ando::colors::green, ando::Color failureColor = ando::colors::invisible);
+				virtual void DrawOutlinedProgressBar(float x, float y, float width, float height, float percentage, ando::Color successColor = ando::colors::green, ando::Color failureColor = ando::colors::invisible, ando::Color outlineColor = ando::colors::black);
 			};
 		}
 	}

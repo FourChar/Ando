@@ -112,6 +112,7 @@ namespace ando {
 	}
 
 	namespace colors {
+		Color invisible(0, 0, 0, 0);
 		Color black(0, 0, 0);
 		Color white(255, 255, 255);
 

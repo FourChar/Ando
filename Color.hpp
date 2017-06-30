@@ -45,6 +45,7 @@ namespace ando {
 	};
 
 	namespace colors {
+		extern Color invisible;
 		extern Color black;
 		extern Color white;
 

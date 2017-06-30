@@ -104,6 +104,22 @@ namespace ando {
 				this->DrawRectangle(x, y, width, height, outlineColor);
 				this->FillRectangle(x + 1, y + 1, width - 2, height - 2, color);
 			}
+
+			void ISurfaceQueuedRenderer::DrawProgressBar(float x, float y, float width, float height, float percentage, ando::Color successColor, ando::Color failureColor) {
+				auto adjustedWidth = width * percentage;
+
+				if (failureColor.a() > 0)
+					this->FillRectangle(x + (width * percentage), y, width * (1 - percentage), height, failureColor);
+
+				this->FillRectangle(x, y, width * percentage, height, successColor);
+			}
+			void ISurfaceQueuedRenderer::DrawOutlinedProgressBar(float x, float y, float width, float height, float percentage, ando::Color successColor, ando::Color failureColor, ando::Color outlineColor) {
+				if (outlineColor.a() == 255)
+					outlineColor.setA(ISURFACE_OUTLINE_ALPHA);
+
+				this->DrawRectangle(x, y, width, height, outlineColor);
+				this->DrawProgressBar(x + 1, y + 1, width - 2, height - 2, percentage, successColor, failureColor);
+			}
 		}
 	}
 }

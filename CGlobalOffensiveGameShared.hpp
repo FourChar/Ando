@@ -6,11 +6,13 @@
 #endif
 
 #include <memory>
+#include <array>
 
 #include "IBaseGameShared.hpp"
 #include "CGlobalOffensiveGlobalVars.hpp"
 #include "CGlobalOffensiveBaseEntity.hpp"
 #include "CGlobalOffensivePlayerResource.hpp"
+//#include "CGlobalOffensiveSharedInstance.hpp"
 
 #include "Matrix.hpp"
 
@@ -20,6 +22,10 @@ namespace ando {
 			namespace GlobalOffensive {
 				class GameShared : public IBaseGameShared {
 				private: // Variables
+					//CSharedInstance<::ando::process_specific::CounterStrike::GlobalOffensive::CGlobalVars> _globalVars;
+					//const ::std::array<ISharedInstance, 1> instances = { _globalVars };
+
+
 					::ando::process_specific::CounterStrike::GlobalOffensive::CGlobalVars globalVars;
 					::ando::process_specific::CounterStrike::GlobalOffensive::CBaseEntity localPlayer;
 					::ando::process_specific::CounterStrike::GlobalOffensive::CPlayerResource playerResource;
@@ -29,6 +35,10 @@ namespace ando {
 					GameShared();
 
 				public: // Public Getters
+					/*CSharedInstance<::ando::process_specific::CounterStrike::GlobalOffensive::CGlobalVars> &_getGlobalVars() {
+						return this->_globalVars;
+					}*/
+
 					::ando::process_specific::CounterStrike::GlobalOffensive::CGlobalVars &getGlobalVars();
 					::ando::process_specific::CounterStrike::GlobalOffensive::CBaseEntity &getLocalPlayer();
 					::ando::process_specific::CounterStrike::GlobalOffensive::CPlayerResource &getPlayerResource();

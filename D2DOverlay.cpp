@@ -199,7 +199,7 @@ namespace ando {
 					return color->getColor();
 				}
 
-				this->logger->log(ELogLevel::LOG_DEBUG, "{D2DOverlay::toD2DColor} Caching new D2DColor (%u, %u, %u, %u)...", andoColor.r(), andoColor.g(), andoColor.b(), andoColor.a());
+				this->logger->log(ELogLevel::LOG_DEBUG, "{D2DOverlay::toD2DColor} Caching D2DColor (%u) (%u, %u, %u, %u)...", this->colors.size() + 1, andoColor.r(), andoColor.g(), andoColor.b(), andoColor.a());
 
 				this->colors.emplace_back(new direct2d::D2DColor(this->renderTarget, andoColor));
 				return this->colors.at(this->colors.size() - 1)->getColor();

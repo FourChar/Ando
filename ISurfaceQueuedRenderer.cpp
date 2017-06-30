@@ -3,8 +3,6 @@
 #include <cstdarg>
 #include <thread>
 
-#define FORMAT_STRING(s)		char buffer[s] = {0}; { va_list args; va_start(args, format); vsprintf_s(buffer, format, args); va_end(args); }
-
 namespace ando {
 	namespace overlay {
 		namespace surface {

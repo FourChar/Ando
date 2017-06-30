@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 
 			// Crosshair
 			{
-				static Rect<> crosshair;
+				static Rect<float> crosshair;
 				if (crosshair.getWidth() == 0.0f) {
 					crosshair.setWidth(20.0f);
 					crosshair.setHeight(20.0f);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 					crosshair.setY((overlay->getTarget()->getHeight<>() / 2.f) - (crosshair.getHeight() / 2.f));
 				}
 
-				renderer.DrawOutlinedRectangle(crosshair.getX(), crosshair.getY(), crosshair.getWidth(), crosshair.getHeight(), ando::Color(ando::colors::white).setA(75));
+				renderer.DrawOutlinedRectangle(crosshair, ando::Color(ando::colors::white).setA(75));
 				renderer.DrawLine(crosshair.getX(), crosshair.getY(), crosshair.getX() + crosshair.getWidth(), crosshair.getY() + crosshair.getHeight(), ando::Color(ando::colors::green).setA(220));
 				renderer.DrawLine(crosshair.getX(), crosshair.getY() + crosshair.getHeight(), crosshair.getX() + crosshair.getWidth(), crosshair.getY(), ando::Color(ando::colors::green).setA(220));
 			}
@@ -78,102 +78,99 @@ int main(int argc, char *argv[]) {
 						if (player.getIndex() == localPlayer.getIndex())
 							break;
 
+						// Out of Sync Check
 						if (player.getScoreboardPlayer()->getHealth() != player.getHealth())
 							break;
 
-						auto distance = player.getOrigin().distanceTo(localPlayer.getOrigin());
-						auto distancePercentage = 1.0f - (distance / 1600.0f) + 0.1f;
-						if (distancePercentage > 0.65f)
-							distancePercentage += 0.10f;
+						int colorAlpha;
 
-						if (distancePercentage < 0.30f)
-							distancePercentage = 0.30f;
-						if (distancePercentage > 1.0f)
-							distancePercentage = 1.0f;
+						{ // Distance Fade
+							auto distance = player.getOrigin().distanceTo(localPlayer.getOrigin());
+							auto distancePercentage = 1.0f - (distance / 1600.0f) + 0.1f;
 
-						if (distance > 2000.0f)
-							distancePercentage = 0.1f;
+							if (distancePercentage > 0.65f)
+								distancePercentage += 0.10f;
 
-						auto colorAlpha = static_cast<int>(255.0f * distancePercentage);
+							if (distancePercentage < 0.40f)
+								distancePercentage = 0.40f;
+							if (distancePercentage > 1.0f)
+								distancePercentage = 1.0f;
+
+							if (distance > 2000.0f)
+								distancePercentage = 0.1f;
+
+							colorAlpha = static_cast<int>(255.0f * distancePercentage);
+						}
 
 						auto color = ando::Color((localPlayer.getTeam() == player.getTeam()) ? ando::colors::blues::halfBaked : ando::colors::reds::tallPoppy).setA(colorAlpha);
 						auto outlineColor = ando::Color(ando::colors::black).setA(colorAlpha);
 
-						auto headBoneId = Bones::getBoneIdByName(Bones::terroristBones, "head");
+						{ // Skeleton
+							const Bones::CSkeletonChain *skeletonChain;
+							if (player.getTeam() == 2)
+								skeletonChain = &Bones::terroristSkeleton;
+							else
+								skeletonChain = &Bones::counterTerroristSkeleton;
 
-						auto headCoordinates = player.getBoneManager().getBoneOrigin(headBoneId);
+							if (skeletonChain != nullptr) {
+								skeletonChain->iterateStructures([&gameInstance, &player, &renderer, color, outlineColor](const Bones::CConsecutiveBoneStructure *currentStructure) {
+									if (!currentStructure->iterateBones([&gameInstance, &player, &renderer, color, outlineColor](const ::std::size_t previous, const ::std::size_t current, const ::std::size_t next) {
+										if ((current != -1) && (next != -1)) {
+											Vector2<> currentPos;
+											Vector2<> nextPos;
 
-						/*for (auto it = skeletonBones.begin(); it != skeletonBones.end(); it++) {
-							auto firstCoord = boneManager.getBoneOrigin(it->first.getId());
-							auto secondCoord = boneManager.getBoneOrigin(it->second.getId());
+											auto currentOrigin = player.getBoneManager().getBoneOrigin(current);
+											auto nextOrigin = player.getBoneManager().getBoneOrigin(next);
 
-							ando::math::Vector2<> firstPos;
-							ando::math::Vector2<> secondPos;
+											if (!gameInstance->worldToScreen(currentOrigin, currentPos) || !gameInstance->worldToScreen(nextOrigin, nextPos))
+												return false;
 
-							if (!gameInstance->worldToScreen(firstCoord, firstPos))
-								break;
-							if (!gameInstance->worldToScreen(secondCoord, secondPos))
-								break;
+											renderer.DrawOutlinedLine(currentPos, nextPos, color, outlineColor);
+										}
 
-							renderer.DrawOutlinedLine(firstPos.getX(), firstPos.getY(), secondPos.getX(), secondPos.getY(), color);
-						}*/
-
-						const Bones::CSkeletonChain *skeletonChain;
-						if (player.getTeam() == 2)
-							skeletonChain = &Bones::terroristSkeleton;
-						else
-							skeletonChain = &Bones::counterTerroristSkeleton;
-
-						if (skeletonChain != nullptr) {
-							skeletonChain->iterateStructures([&gameInstance, &player, &renderer, color, outlineColor](const Bones::CConsecutiveBoneStructure *currentStructure) {
-								if (!currentStructure->iterateBones([&gameInstance, &player, &renderer, color, outlineColor](const ::std::size_t previous, const ::std::size_t current, const ::std::size_t next) {
-									if ((current != -1) && (next != -1)) {
-										Vector2<> currentPos;
-										Vector2<> nextPos;
-
-										auto currentOrigin = player.getBoneManager().getBoneOrigin(current);
-										auto nextOrigin = player.getBoneManager().getBoneOrigin(next);
-
-										if (!gameInstance->worldToScreen(currentOrigin, currentPos) || !gameInstance->worldToScreen(nextOrigin, nextPos))
-											return false;
-
-										renderer.DrawOutlinedLine(currentPos.getX(), currentPos.getY(), nextPos.getX(), nextPos.getY(), color, outlineColor);
+										return true;
+									})) {
+										return false;
 									}
 
 									return true;
-								})) {
-									return false;
-								}
-
-								return true;
-							});
+								});
+							}
 						}
 
 						Vector2<> originPos;
 						if (!gameInstance->worldToScreen(player.getOrigin(), originPos))
 							break;
 
+						auto headCoordinates = player.getBoneManager().getBoneOrigin(Bones::getBoneIdByName(Bones::terroristBones, "head"));
+
 						Vector2<> headPos;
 						if (!gameInstance->worldToScreen(headCoordinates, headPos))
 							break;
 
 						auto healthPercentage = static_cast<float>(player.getScoreboardPlayer()->getHealth()) / 100.0f;
-						auto nameXOffset = player.getScoreboardPlayer()->getName().length() * 5;
+						auto armorPercentage = static_cast<float>(player.getScoreboardPlayer()->getArmor()) / 100.0f;
 
-						renderer.DrawOutlinedRectangle(headPos.getX() - 2.0f, headPos.getY() - 2.0f, 4.0f, 4.0f, color, outlineColor);
+						auto armorColor = ando::Color(color)
+							.setR(static_cast<uint8_t>(static_cast<float>(color.r()) / 2.0f))
+							.setG(static_cast<uint8_t>(static_cast<float>(color.g()) / 2.0f));
 
-						renderer.DrawOutlinedString(originPos.getX() - nameXOffset, originPos.getY() - 20, 13, false, color, outlineColor, "Verdana", "[%s]", player.getScoreboardPlayer()->getName().c_str());
-						renderer.DrawProgressBar(originPos.getX() - 25.0f, originPos.getY(), 50.f, 2.f, healthPercentage, color, outlineColor);
+						auto nameXOffset = static_cast<float>(player.getScoreboardPlayer()->getName().length() * 5);
+
+						renderer.DrawOutlinedRectangle(headPos - Vector2<>(2, 2), Vector2<>(4, 4), color, outlineColor);
+						renderer.DrawOutlinedString(originPos - Vector2<>(nameXOffset, 20), 13, false, color, outlineColor, "Verdana", "[%s]", player.getScoreboardPlayer()->getName().c_str());
+						renderer.DrawProgressBar(originPos - Vector2<>(25, 0), Vector2<>(50, 2), healthPercentage, color, outlineColor);
+						renderer.DrawProgressBar(originPos - Vector2<>(25, -4), Vector2<>(50, 2), armorPercentage, armorColor, outlineColor);
 						break;
 					}
 
 					case EClientClassID::CPlantedC4:
 					case EClientClassID::CC4: {
-						ando::math::Vector2<> originPos;
+						Vector2<> originPos;
 						if (!gameInstance->worldToScreen(entity.getOrigin(), originPos))
 							break;
 
-						renderer.DrawOutlinedRectangle(originPos.getX() - 10, originPos.getY() - 10 - 5, 20, 20, ando::colors::white);
+						renderer.DrawOutlinedRectangle(originPos - Vector2<>(10, 10 + 5), Vector2<>(20, 20), ando::colors::white);
 						break;
 					}
 				}
